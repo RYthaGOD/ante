@@ -1,0 +1,10 @@
+{
+  "name": "@ante/oracle",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "node src/demo.ts",
+    "feeder": "node src/feeder.ts"
+  }
+}

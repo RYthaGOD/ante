@@ -1,0 +1,12 @@
+{
+  "name": "@ante/client",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node smoke.ts"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.32.1"
+  }
+}

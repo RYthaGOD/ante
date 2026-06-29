@@ -1,0 +1,10 @@
+[
+  { "id": "rot-wc26-bra-ger:home_win", "kind": "home_win", "fixtureId": "rot-wc26-bra-ger" },
+  { "id": "rot-wc26-fra-arg:over_2_5", "kind": "over_2_5", "fixtureId": "rot-wc26-fra-arg" },
+  { "id": "rot-wc26:golden-glove-glory", "kind": "custom" },
+  { "id": "rot-wc26-eng-esp:home_win", "kind": "home_win", "fixtureId": "rot-wc26-eng-esp" },
+  { "id": "rot-wc26:rookie-rocket", "kind": "custom" },
+  { "id": "rot-wc26-ita-ned:over_2_5", "kind": "over_2_5", "fixtureId": "rot-wc26-ita-ned" },
+  { "id": "rot-wc26:underdog-story", "kind": "custom" },
+  { "id": "rot-wc26-usa-mex:home_win", "kind": "home_win", "fixtureId": "rot-wc26-usa-mex" }
+]

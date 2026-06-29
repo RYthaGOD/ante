@@ -1,0 +1,110 @@
+{
+  "fixtures": [
+    {
+      "id": "wc26-esp-ger",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "Spain",
+      "awayTeam": "Germany",
+      "kickoff": "2026-06-18T16:00:00Z",
+      "status": "final"
+    },
+    {
+      "id": "wc26-fra-ned",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "France",
+      "awayTeam": "Netherlands",
+      "kickoff": "2026-06-20T19:00:00Z",
+      "status": "final"
+    },
+    {
+      "id": "wc26-usa-mex",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "USA",
+      "awayTeam": "Mexico",
+      "kickoff": "2026-06-30T23:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "wc26-bra-esp",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "Brazil",
+      "awayTeam": "Spain",
+      "kickoff": "2026-07-01T19:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "wc26-arg-fra",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "Argentina",
+      "awayTeam": "France",
+      "kickoff": "2026-07-02T15:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "wc26-ger-ita",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "Germany",
+      "awayTeam": "Italy",
+      "kickoff": "2026-07-02T18:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "wc26-eng-bel",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "England",
+      "awayTeam": "Belgium",
+      "kickoff": "2026-07-03T17:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "rot-wc26-bra-ger",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "Brazil",
+      "awayTeam": "Germany",
+      "kickoff": "2026-07-15T18:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "rot-wc26-fra-arg",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "France",
+      "awayTeam": "Argentina",
+      "kickoff": "2026-07-15T18:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "rot-wc26-eng-esp",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "England",
+      "awayTeam": "Spain",
+      "kickoff": "2026-07-15T18:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "rot-wc26-ita-ned",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "Italy",
+      "awayTeam": "Netherlands",
+      "kickoff": "2026-07-15T18:00:00Z",
+      "status": "scheduled"
+    },
+    {
+      "id": "rot-wc26-usa-mex",
+      "competition": "FIFA World Cup 2026",
+      "homeTeam": "USA",
+      "awayTeam": "Mexico",
+      "kickoff": "2026-07-15T18:00:00Z",
+      "status": "scheduled"
+    }
+  ],
+  "results": {
+    "wc26-esp-ger": {
+      "homeGoals": 3,
+      "awayGoals": 1
+    },
+    "wc26-fra-ned": {
+      "homeGoals": 1,
+      "awayGoals": 1
+    }
+  }
+}

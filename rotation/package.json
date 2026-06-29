@@ -1,0 +1,15 @@
+{
+  "name": "ante-rotation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node rotate.mjs"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.32.1",
+    "@solana/web3.js": "^1.98.0"
+  }
+}

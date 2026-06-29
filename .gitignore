@@ -1,0 +1,31 @@
+# Rust / Anchor
+/target
+**/target
+.anchor
+test-ledger
+
+# Logs (build/deploy/install — never ship)
+*.log
+
+# Node
+node_modules
+**/node_modules
+.next
+out
+dist
+
+# Solana keypairs (keep program keypair under target/, ignored above)
+*.pem
+
+# Env / editor
+.env
+.env.local
+.DS_Store
+
+# secrets
+.openai-key
+*keypair*.json
+
+# Internal / not for public submission repo
+/PLAN.md
+video/
