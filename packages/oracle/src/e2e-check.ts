@@ -37,7 +37,8 @@ const check = (name: string, ok: boolean, detail = "") => {
 (async () => {
   const id = `e2e-${Date.now()}`;
   const mkt = marketPda(id);
-  const settleAfter = Math.floor(Date.now() / 1000) - 3600; // already past -> settle allowed
+  const settleAfter = Math.floor(Date.now() / 1000) + 6; // cutoff: bets allowed now, settlement once it passes
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const mainProgram = new Program(idl, new AnchorProvider(connection, new Wallet(main), { commitment: "confirmed" }));
 
   // fresh "user"
@@ -65,6 +66,15 @@ const check = (name: string, ok: boolean, detail = "") => {
   m = await mainProgram.account.market.fetch(mkt);
   check("place_bet (YES user + NO house)", m.poolYes.toNumber() === 0.05 * SOL && m.poolNo.toNumber() === 0.05 * SOL,
     `yes=${m.poolYes.toNumber() / SOL} no=${m.poolNo.toNumber() / SOL}`);
+
+  // 3b. once the cutoff passes, betting must be rejected
+  await sleep(8000);
+  let lateBlocked = false;
+  try {
+    await userProgram.methods.placeBet({ yes: {} }, new BN(0.01 * SOL))
+      .accountsPartial({ market: mkt, bet: betPda(mkt, user.publicKey, 1), bettor: user.publicKey, systemProgram: web3.SystemProgram.programId }).rpc();
+  } catch { lateBlocked = true; }
+  check("bet after cutoff rejected", lateBlocked);
 
   // 4. settle YES (oracle posts verified outcome + digest; program re-checks the hash)
   await mainProgram.methods.postCustomResult({ yes: {} }, customDigest(id, "YES"))

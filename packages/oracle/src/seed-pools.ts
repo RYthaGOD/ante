@@ -2,9 +2,8 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import anchor from '@coral-xyz/anchor';
 
-// Demo-only helper: seeds realistic parimutuel pools so the market grid looks
-// alive on camera, and stages opposing liquidity on the hero market
-// (saudi-giant-killing) so the recorded YES bet settles into a ~2x claim.
+// Demo-only helper: seeds realistic parimutuel pools on the OPEN markets so the
+// grid looks alive (settled markets can no longer take bets, by design).
 //   Run: ANCHOR_PROVIDER_URL=https://api.devnet.solana.com \
 //        ANCHOR_WALLET=~/.config/solana/id.json node packages/oracle/src/seed-pools.ts
 const { web3, AnchorProvider, Program, BN, Wallet } = anchor;
@@ -33,12 +32,14 @@ const betPda = (m: any, bettor: any, ob: number) =>
   web3.PublicKey.findProgramAddressSync([Buffer.from('bet'), m.toBuffer(), bettor.toBuffer(), Buffer.from([ob])], PROGRAM_ID)[0];
 
 const SEED: [string, 'yes' | 'no', number][] = [
-  ['wc26-usa-mex:home_win', 'yes', 0.15], ['wc26-usa-mex:home_win', 'no', 0.09],
-  ['wc26-usa-mex:over_2_5', 'yes', 0.08], ['wc26-usa-mex:over_2_5', 'no', 0.13],
-  ['wc26:mbappe-golden-boot', 'yes', 0.18], ['wc26:mbappe-golden-boot', 'no', 0.06],
-  ['wc26:conmebol-lifts-it', 'yes', 0.10], ['wc26:conmebol-lifts-it', 'no', 0.10],
-  ['wc26:debutant-knockout', 'yes', 0.05], ['wc26:debutant-knockout', 'no', 0.15],
-  ['wc26:saudi-giant-killing', 'no', 0.40], ['wc26:saudi-giant-killing', 'yes', 0.20],
+  ['wc26-bra-jpn:home_win', 'yes', 0.15], ['wc26-bra-jpn:home_win', 'no', 0.10],
+  ['wc26-ger-par:over_2_5', 'yes', 0.12], ['wc26-ger-par:over_2_5', 'no', 0.08],
+  ['wc26-ned-mar:home_win', 'yes', 0.10], ['wc26-ned-mar:home_win', 'no', 0.12],
+  ['wc26-fra-swe:over_2_5', 'yes', 0.14], ['wc26-fra-swe:over_2_5', 'no', 0.07],
+  ['wc26-eng-cod:home_win', 'yes', 0.20], ['wc26-eng-cod:home_win', 'no', 0.05],
+  ['wc26-esp-aut:over_2_5', 'yes', 0.16], ['wc26-esp-aut:over_2_5', 'no', 0.06],
+  ['wc26-por-cro:home_win', 'yes', 0.11], ['wc26-por-cro:home_win', 'no', 0.11],
+  ['wc26-arg-cpv:over_2_5', 'yes', 0.18], ['wc26-arg-cpv:over_2_5', 'no', 0.05],
 ];
 
 (async () => {

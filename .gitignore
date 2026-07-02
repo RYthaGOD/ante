@@ -25,6 +25,7 @@ dist
 # secrets
 .openai-key
 *keypair*.json
+.txodds-creds.json
 
 # Internal / not for public submission repo
 /PLAN.md

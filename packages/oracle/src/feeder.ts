@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import anchor from '@coral-xyz/anchor';
-import { MockTxOddsAdapter } from './txodds/mock.ts';
+import { getTxOddsAdapter } from './txodds/factory.ts';
 import { loadMarkets, loadCustomOutcomes, isResolvable } from './market/registry.ts';
 import { settleScore, settleCustom } from './market/settle.ts';
 import { hexToBytes } from './txodds/digest.ts';
@@ -64,7 +64,8 @@ async function init() {
 
 async function settle() {
   const { program, authority } = loadProgram();
-  const txodds = new MockTxOddsAdapter();
+  const { adapter: txodds, live } = getTxOddsAdapter();
+  console.log(`feed     ${live ? 'LIVE TxODDS (TxLINE)' : 'mock TxODDS (no API creds)'}`);
   const customOutcomes = loadCustomOutcomes();
 
   for (const m of loadMarkets()) {

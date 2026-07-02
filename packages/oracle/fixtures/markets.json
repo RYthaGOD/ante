@@ -1,201 +1,155 @@
 [
   {
-    "id": "wc26-esp-ger:home_win",
-    "title": "La Roja Lay Down a Marker",
-    "blurb": "Spain beat Germany in the Group E heavyweight clash.",
+    "id": "wc26-esp-sau:home_win",
+    "title": "La Roja Roll the Desert Hawks",
+    "blurb": "Spain beat Saudi Arabia.",
     "kind": "home_win",
-    "fixtureId": "wc26-esp-ger",
-    "resolutionDate": "2026-06-18T21:00:00Z",
+    "fixtureId": "wc26-esp-sau",
+    "resolutionDate": "2026-06-21T19:00:00Z",
     "art": "spain"
   },
   {
-    "id": "wc26-esp-ger:over_2_5",
-    "title": "Group E Goal Storm",
-    "blurb": "Over 2.5 goals when Spain meet Germany.",
-    "kind": "over_2_5",
-    "fixtureId": "wc26-esp-ger",
-    "resolutionDate": "2026-06-18T21:00:00Z",
-    "art": "goals"
-  },
-  {
-    "id": "wc26-fra-ned:home_win",
-    "title": "Les Bleus Tame the Oranje",
-    "blurb": "France beat the Netherlands.",
+    "id": "wc26-uru-esp:home_win",
+    "title": "Uruguay Ambush La Roja",
+    "blurb": "Uruguay beat Spain.",
     "kind": "home_win",
-    "fixtureId": "wc26-fra-ned",
-    "resolutionDate": "2026-06-20T21:00:00Z",
-    "art": "france"
-  },
-  {
-    "id": "wc26-fra-ned:over_2_5",
-    "title": "Low-Country Lockdown",
-    "blurb": "Over 2.5 goals in France vs Netherlands.",
-    "kind": "over_2_5",
-    "fixtureId": "wc26-fra-ned",
-    "resolutionDate": "2026-06-20T21:00:00Z",
-    "art": "defense"
-  },
-  {
-    "id": "wc26-usa-mex:home_win",
-    "title": "Hosts Rule the Rivalry",
-    "blurb": "The USA beat Mexico on home soil.",
-    "kind": "home_win",
-    "fixtureId": "wc26-usa-mex",
-    "resolutionDate": "2026-06-30T21:00:00Z",
-    "art": "usa"
-  },
-  {
-    "id": "wc26-usa-mex:over_2_5",
-    "title": "Border Clash Goal Rush",
-    "blurb": "Over 2.5 goals in USA vs Mexico.",
-    "kind": "over_2_5",
-    "fixtureId": "wc26-usa-mex",
-    "resolutionDate": "2026-06-30T21:00:00Z",
-    "art": "fireworks"
-  },
-  {
-    "id": "wc26:saudi-giant-killing",
-    "title": "Saudis Topple a Titan",
-    "blurb": "Saudi Arabia beat a top-five ranked nation in the group stage.",
-    "kind": "custom",
-    "resolutionDate": "2026-06-22T21:00:00Z",
-    "art": "saudi"
-  },
-  {
-    "id": "wc26:mbappe-golden-boot",
-    "title": "Mbappe Owns the Golden Boot",
-    "blurb": "Kylian Mbappe finishes as the tournament's top scorer.",
-    "kind": "custom",
-    "resolutionDate": "2026-07-19T21:00:00Z",
-    "art": "mbappe"
-  },
-  {
-    "id": "wc26:conmebol-lifts-it",
-    "title": "South America Reclaims the Crown",
-    "blurb": "A CONMEBOL nation lifts the 2026 trophy.",
-    "kind": "custom",
-    "resolutionDate": "2026-07-19T21:00:00Z",
+    "fixtureId": "wc26-uru-esp",
+    "resolutionDate": "2026-06-27T03:00:00Z",
     "art": "conmebol"
   },
   {
-    "id": "wc26:debutant-knockout",
-    "title": "A Debutant Gatecrashes the Knockouts",
-    "blurb": "A team making its World Cup debut reaches the Round of 32.",
-    "kind": "custom",
-    "resolutionDate": "2026-07-05T21:00:00Z",
-    "art": "debutant"
-  },
-  {
-    "id": "wc26-bra-esp:home_win",
-    "title": "Samba Showdown: Brazil Win",
-    "blurb": "Brazil's flair to overpower Spain in the knockout clash.",
-    "kind": "home_win",
-    "fixtureId": "wc26-bra-esp",
-    "resolutionDate": "2026-07-01T19:00:00Z",
-    "art": "samba-spectacle"
-  },
-  {
-    "id": "wc26-arg-fra:over_2_5",
-    "title": "Goals Galore: Argentina v France",
-    "blurb": "Over 2.5 goals in the Argentina vs France heavyweight tie.",
+    "id": "wc26-eng-cro:over_2_5",
+    "title": "Three Lions Goal Storm",
+    "blurb": "Over 2.5 goals in England vs Croatia.",
     "kind": "over_2_5",
-    "fixtureId": "wc26-arg-fra",
-    "resolutionDate": "2026-07-02T15:00:00Z",
+    "fixtureId": "wc26-eng-cro",
+    "resolutionDate": "2026-06-17T23:00:00Z",
+    "art": "goals"
+  },
+  {
+    "id": "wc26-mex-kor:over_2_5",
+    "title": "El Tri Shootout",
+    "blurb": "Over 2.5 goals in Mexico vs South Korea.",
+    "kind": "over_2_5",
+    "fixtureId": "wc26-mex-kor",
+    "resolutionDate": "2026-06-19T04:00:00Z",
+    "art": "fireworks"
+  },
+  {
+    "id": "wc26-col-por:over_2_5",
+    "title": "Sparks in Bogotá",
+    "blurb": "Over 2.5 goals in Colombia vs Portugal.",
+    "kind": "over_2_5",
+    "fixtureId": "wc26-col-por",
+    "resolutionDate": "2026-06-28T02:30:00Z",
     "art": "goal-frenzy"
   },
   {
-    "id": "wc26-ger-ita:home_win",
-    "title": "Teutonic Triumph: Germany Win",
-    "blurb": "Germany to overpower Italy in a classic European duel.",
+    "id": "wc26-sco-bra:home_win",
+    "title": "Tartan Army Topple the Seleção",
+    "blurb": "Scotland beat Brazil.",
     "kind": "home_win",
-    "fixtureId": "wc26-ger-ita",
-    "resolutionDate": "2026-07-02T18:00:00Z",
-    "art": "teutonic-triumph"
+    "fixtureId": "wc26-sco-bra",
+    "resolutionDate": "2026-06-25T01:00:00Z",
+    "art": "debutant"
   },
   {
-    "id": "wc26-eng-bel:over_2_5",
-    "title": "Goal Fest: England v Belgium",
-    "blurb": "Over 2.5 goals as England and Belgium trade blows.",
-    "kind": "over_2_5",
-    "fixtureId": "wc26-eng-bel",
-    "resolutionDate": "2026-07-03T17:00:00Z",
-    "art": "goal-fireworks"
-  },
-  {
-    "id": "wc26:golazo-king",
-    "title": "Golazo King",
-    "blurb": "A hat-trick is scored somewhere in the Round of 32.",
-    "kind": "custom",
-    "resolutionDate": "2026-07-05T22:00:00Z",
+    "id": "wc26-arg-alg:home_win",
+    "title": "La Albiceleste March On",
+    "blurb": "Argentina beat Algeria.",
+    "kind": "home_win",
+    "fixtureId": "wc26-arg-alg",
+    "resolutionDate": "2026-06-17T04:00:00Z",
     "art": "golazo-king"
   },
   {
-    "id": "rot-wc26-bra-ger:home_win",
-    "title": "Samba Showdown: Brazil Triumph?",
-    "blurb": "Will Brazil outshine Germany in this thriller?",
+    "id": "wc26-sau-uru:home_win",
+    "title": "Green Falcons Stun La Celeste",
+    "blurb": "Saudi Arabia beat Uruguay.",
     "kind": "home_win",
-    "resolutionDate": "2026-07-15T20:00:00Z",
-    "art": "spain",
-    "fixtureId": "rot-wc26-bra-ger"
-  },
-  {
-    "id": "rot-wc26-fra-arg:over_2_5",
-    "title": "Goals Galore: France vs Argentina!",
-    "blurb": "Can France and Argentina deliver fireworks with over 2.5 goals?",
-    "kind": "over_2_5",
-    "resolutionDate": "2026-07-15T20:00:00Z",
-    "art": "goals",
-    "fixtureId": "rot-wc26-fra-arg"
-  },
-  {
-    "id": "rot-wc26:golden-glove-glory",
-    "title": "Golden Glove Glory!",
-    "blurb": "Which keeper will wear the Golden Glove crown?",
-    "kind": "custom",
-    "resolutionDate": "2026-07-15T20:00:00Z",
-    "art": "france"
-  },
-  {
-    "id": "rot-wc26-eng-esp:home_win",
-    "title": "It's Coming Home: English Victory?",
-    "blurb": "Can England triumph over a strong Spanish side?",
-    "kind": "home_win",
-    "resolutionDate": "2026-07-15T20:00:00Z",
-    "art": "defense",
-    "fixtureId": "rot-wc26-eng-esp"
-  },
-  {
-    "id": "rot-wc26:rookie-rocket",
-    "title": "Rookie Rocket: Breakout Star?",
-    "blurb": "Which young talent will take the world by storm?",
-    "kind": "custom",
-    "resolutionDate": "2026-07-15T20:00:00Z",
-    "art": "usa"
-  },
-  {
-    "id": "rot-wc26-ita-ned:over_2_5",
-    "title": "Net-Busters: Italy vs Netherlands",
-    "blurb": "Are Italy and Netherlands set for a goal fest over 2.5?",
-    "kind": "over_2_5",
-    "resolutionDate": "2026-07-15T20:00:00Z",
-    "art": "fireworks",
-    "fixtureId": "rot-wc26-ita-ned"
-  },
-  {
-    "id": "rot-wc26:underdog-story",
-    "title": "Underdog Story: Shock the World!",
-    "blurb": "Which surprise team will capture hearts and minds?",
-    "kind": "custom",
-    "resolutionDate": "2026-07-15T20:00:00Z",
+    "fixtureId": "wc26-sau-uru",
+    "resolutionDate": "2026-06-16T01:00:00Z",
     "art": "saudi"
   },
   {
-    "id": "rot-wc26-usa-mex:home_win",
-    "title": "Stars and Stripes Soar: USA Win?",
-    "blurb": "Can the USA take down Mexico in this classic rivalry?",
+    "id": "wc26-tur-usa:over_2_5",
+    "title": "Bosphorus Goal Rush",
+    "blurb": "Over 2.5 goals in Turkey vs USA.",
+    "kind": "over_2_5",
+    "fixtureId": "wc26-tur-usa",
+    "resolutionDate": "2026-06-26T05:00:00Z",
+    "art": "usa"
+  },
+  {
+    "id": "wc26-bra-jpn:home_win",
+    "title": "Seleção Meet the Samurai",
+    "blurb": "Brazil to beat Japan.",
     "kind": "home_win",
-    "resolutionDate": "2026-07-15T20:00:00Z",
-    "art": "mbappe",
-    "fixtureId": "rot-wc26-usa-mex"
+    "fixtureId": "wc26-bra-jpn",
+    "resolutionDate": "2026-06-29T20:00:00Z",
+    "art": "samba-spectacle"
+  },
+  {
+    "id": "wc26-ger-par:over_2_5",
+    "title": "Die Mannschaft Goal Hunt",
+    "blurb": "Over 2.5 goals in Germany vs Paraguay.",
+    "kind": "over_2_5",
+    "fixtureId": "wc26-ger-par",
+    "resolutionDate": "2026-06-29T23:30:00Z",
+    "art": "teutonic-triumph"
+  },
+  {
+    "id": "wc26-ned-mar:home_win",
+    "title": "Oranje vs the Atlas Lions",
+    "blurb": "Netherlands to beat Morocco.",
+    "kind": "home_win",
+    "fixtureId": "wc26-ned-mar",
+    "resolutionDate": "2026-06-30T04:00:00Z",
+    "art": "defense"
+  },
+  {
+    "id": "wc26-fra-swe:over_2_5",
+    "title": "Les Bleus Light Up Stockholm",
+    "blurb": "Over 2.5 goals in France vs Sweden.",
+    "kind": "over_2_5",
+    "fixtureId": "wc26-fra-swe",
+    "resolutionDate": "2026-07-01T00:00:00Z",
+    "art": "france"
+  },
+  {
+    "id": "wc26-eng-cod:home_win",
+    "title": "Three Lions Prowl",
+    "blurb": "England to beat Congo DR.",
+    "kind": "home_win",
+    "fixtureId": "wc26-eng-cod",
+    "resolutionDate": "2026-07-01T19:00:00Z",
+    "art": "mbappe"
+  },
+  {
+    "id": "wc26-esp-aut:over_2_5",
+    "title": "La Roja Goal Parade",
+    "blurb": "Over 2.5 goals in Spain vs Austria.",
+    "kind": "over_2_5",
+    "fixtureId": "wc26-esp-aut",
+    "resolutionDate": "2026-07-02T22:00:00Z",
+    "art": "goal-fireworks"
+  },
+  {
+    "id": "wc26-por-cro:home_win",
+    "title": "Iberian Lions vs the Vatreni",
+    "blurb": "Portugal to beat Croatia.",
+    "kind": "home_win",
+    "fixtureId": "wc26-por-cro",
+    "resolutionDate": "2026-07-03T02:00:00Z",
+    "art": "goals"
+  },
+  {
+    "id": "wc26-arg-cpv:over_2_5",
+    "title": "Messi's Men Pour It On",
+    "blurb": "Over 2.5 goals in Argentina vs Cape Verde.",
+    "kind": "over_2_5",
+    "fixtureId": "wc26-arg-cpv",
+    "resolutionDate": "2026-07-04T01:00:00Z",
+    "art": "conmebol"
   }
 ]
