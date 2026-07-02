@@ -1,0 +1,23 @@
+{
+  "_comment": "Maps ANTE fixture ids -> live TxODDS numeric FixtureId (World Cup CompetitionId 72). Participant1 order matches our homeTeam, so swap is omitted (false). Update via `npm run txodds -- fixtures`.",
+  "competitionId": 72,
+  "fixtures": {
+    "wc26-esp-sau": { "fixtureId": 17588232 },
+    "wc26-uru-esp": { "fixtureId": 17588404 },
+    "wc26-eng-cro": { "fixtureId": 17588228 },
+    "wc26-mex-kor": { "fixtureId": 17588223 },
+    "wc26-col-por": { "fixtureId": 17588391 },
+    "wc26-sco-bra": { "fixtureId": 17588398 },
+    "wc26-arg-alg": { "fixtureId": 17588322 },
+    "wc26-sau-uru": { "fixtureId": 17588311 },
+    "wc26-tur-usa": { "fixtureId": 17926593 },
+    "wc26-bra-jpn": { "fixtureId": 18172469 },
+    "wc26-ger-par": { "fixtureId": 18175983 },
+    "wc26-ned-mar": { "fixtureId": 18172280 },
+    "wc26-fra-swe": { "fixtureId": 18175981 },
+    "wc26-eng-cod": { "fixtureId": 18179764 },
+    "wc26-esp-aut": { "fixtureId": 18179551 },
+    "wc26-por-cro": { "fixtureId": 18179763 },
+    "wc26-arg-cpv": { "fixtureId": 18175918 }
+  }
+}

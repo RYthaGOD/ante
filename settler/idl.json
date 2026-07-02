@@ -1,0 +1,635 @@
+{
+  "address": "G1tgXodmDq9X3MTtdHLNpjDWscUqsjiW29fcpUHvJoHu",
+  "metadata": {
+    "name": "ante_market",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "ANTE — verifiable settlement for World Cup prediction markets"
+  },
+  "instructions": [
+    {
+      "name": "claim",
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "bet",
+          "writable": true
+        },
+        {
+          "name": "bettor",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_market",
+      "discriminator": [
+        88,
+        154,
+        248,
+        186,
+        48,
+        14,
+        123,
+        244
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_market",
+      "discriminator": [
+        35,
+        35,
+        189,
+        193,
+        155,
+        48,
+        170,
+        203
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "arg",
+                "path": "market_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "market_id",
+          "type": "string"
+        },
+        {
+          "name": "fixture_id",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "type": {
+            "defined": {
+              "name": "MarketKind"
+            }
+          }
+        },
+        {
+          "name": "settle_after",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "place_bet",
+      "discriminator": [
+        222,
+        62,
+        67,
+        220,
+        63,
+        166,
+        126,
+        33
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "bet",
+          "writable": true
+        },
+        {
+          "name": "bettor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "outcome",
+          "type": {
+            "defined": {
+              "name": "Outcome"
+            }
+          }
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "post_custom_result",
+      "discriminator": [
+        228,
+        7,
+        169,
+        51,
+        3,
+        209,
+        134,
+        72
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "oracle",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "winning_outcome",
+          "type": {
+            "defined": {
+              "name": "Outcome"
+            }
+          }
+        },
+        {
+          "name": "result_digest",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "post_result",
+      "discriminator": [
+        209,
+        11,
+        193,
+        110,
+        192,
+        1,
+        142,
+        9
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "oracle",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "home_goals",
+          "type": "u8"
+        },
+        {
+          "name": "away_goals",
+          "type": "u8"
+        },
+        {
+          "name": "result_digest",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "set_settle_after",
+      "discriminator": [
+        151,
+        61,
+        236,
+        240,
+        163,
+        251,
+        49,
+        97
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_settle_after",
+          "type": "i64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Bet",
+      "discriminator": [
+        147,
+        23,
+        35,
+        59,
+        15,
+        75,
+        155,
+        32
+      ]
+    },
+    {
+      "name": "Market",
+      "discriminator": [
+        219,
+        190,
+        213,
+        55,
+        0,
+        227,
+        198,
+        154
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "MarketResolved",
+      "discriminator": [
+        89,
+        67,
+        230,
+        95,
+        143,
+        106,
+        199,
+        202
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "MarketIdTooLong",
+      "msg": "market id too long"
+    },
+    {
+      "code": 6001,
+      "name": "FixtureIdTooLong",
+      "msg": "fixture id too long"
+    },
+    {
+      "code": 6002,
+      "name": "ZeroAmount",
+      "msg": "amount must be greater than zero"
+    },
+    {
+      "code": 6003,
+      "name": "BadOutcome",
+      "msg": "outcome must be Yes or No"
+    },
+    {
+      "code": 6004,
+      "name": "MarketClosed",
+      "msg": "market is not open"
+    },
+    {
+      "code": 6005,
+      "name": "BettingClosed",
+      "msg": "betting is closed for this market"
+    },
+    {
+      "code": 6006,
+      "name": "MarketHasFunds",
+      "msg": "cannot close a market that still holds staked funds"
+    },
+    {
+      "code": 6007,
+      "name": "Overflow",
+      "msg": "arithmetic overflow"
+    },
+    {
+      "code": 6008,
+      "name": "AlreadyResolved",
+      "msg": "market already resolved"
+    },
+    {
+      "code": 6009,
+      "name": "NotOracle",
+      "msg": "signer is not the market oracle"
+    },
+    {
+      "code": 6010,
+      "name": "TooEarly",
+      "msg": "too early to settle"
+    },
+    {
+      "code": 6011,
+      "name": "WrongKind",
+      "msg": "wrong settlement instruction for this market kind"
+    },
+    {
+      "code": 6012,
+      "name": "DigestMismatch",
+      "msg": "result digest does not match posted result"
+    },
+    {
+      "code": 6013,
+      "name": "NotResolved",
+      "msg": "market not resolved yet"
+    },
+    {
+      "code": 6014,
+      "name": "AlreadyClaimed",
+      "msg": "bet already claimed"
+    },
+    {
+      "code": 6015,
+      "name": "NotAWinner",
+      "msg": "bet is not on the winning outcome"
+    },
+    {
+      "code": 6016,
+      "name": "NoWinners",
+      "msg": "no winning stake in pool"
+    },
+    {
+      "code": 6017,
+      "name": "WrongMarket",
+      "msg": "bet does not belong to this market"
+    },
+    {
+      "code": 6018,
+      "name": "NotYourBet",
+      "msg": "bet does not belong to this signer"
+    }
+  ],
+  "types": [
+    {
+      "name": "Bet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "bettor",
+            "type": "pubkey"
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": {
+                "name": "Outcome"
+              }
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Market",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "oracle",
+            "type": "pubkey"
+          },
+          {
+            "name": "market_id",
+            "type": "string"
+          },
+          {
+            "name": "fixture_id",
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "MarketKind"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "MarketStatus"
+              }
+            }
+          },
+          {
+            "name": "settle_after",
+            "type": "i64"
+          },
+          {
+            "name": "pool_yes",
+            "type": "u64"
+          },
+          {
+            "name": "pool_no",
+            "type": "u64"
+          },
+          {
+            "name": "winning_outcome",
+            "type": {
+              "defined": {
+                "name": "Outcome"
+              }
+            }
+          },
+          {
+            "name": "result_digest",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "HomeWin"
+          },
+          {
+            "name": "Over25"
+          },
+          {
+            "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "market_id",
+            "type": "string"
+          },
+          {
+            "name": "winning_outcome",
+            "type": {
+              "defined": {
+                "name": "Outcome"
+              }
+            }
+          },
+          {
+            "name": "result_digest",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Resolved"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Outcome",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Unresolved"
+          },
+          {
+            "name": "Yes"
+          },
+          {
+            "name": "No"
+          }
+        ]
+      }
+    }
+  ]
+}

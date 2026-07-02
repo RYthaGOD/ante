@@ -1,10 +1,7 @@
 [
-  { "id": "rot-wc26-bra-ger:home_win", "kind": "home_win", "fixtureId": "rot-wc26-bra-ger" },
-  { "id": "rot-wc26-fra-arg:over_2_5", "kind": "over_2_5", "fixtureId": "rot-wc26-fra-arg" },
-  { "id": "rot-wc26:golden-glove-glory", "kind": "custom" },
-  { "id": "rot-wc26-eng-esp:home_win", "kind": "home_win", "fixtureId": "rot-wc26-eng-esp" },
-  { "id": "rot-wc26:rookie-rocket", "kind": "custom" },
-  { "id": "rot-wc26-ita-ned:over_2_5", "kind": "over_2_5", "fixtureId": "rot-wc26-ita-ned" },
-  { "id": "rot-wc26:underdog-story", "kind": "custom" },
-  { "id": "rot-wc26-usa-mex:home_win", "kind": "home_win", "fixtureId": "rot-wc26-usa-mex" }
+  { "id": "wc26-mex-ecu:home_win", "kind": "home_win", "fixtureId": "wc26-mex-ecu", "txFixtureId": 18179759, "kickoff": "2026-07-01T01:00:00Z" },
+  { "id": "wc26-bel-sen:over_2_5", "kind": "over_2_5", "fixtureId": "wc26-bel-sen", "txFixtureId": 18179550, "kickoff": "2026-07-01T20:00:00Z" },
+  { "id": "wc26-usa-bih:home_win", "kind": "home_win", "fixtureId": "wc26-usa-bih", "txFixtureId": 18172379, "kickoff": "2026-07-02T00:00:00Z" },
+  { "id": "wc26-swi-alg:home_win", "kind": "home_win", "fixtureId": "wc26-swi-alg", "txFixtureId": 18179552, "kickoff": "2026-07-03T03:00:00Z" },
+  { "id": "wc26-col-gha:over_2_5", "kind": "over_2_5", "fixtureId": "wc26-col-gha", "txFixtureId": 18179549, "kickoff": "2026-07-04T01:30:00Z" }
 ]

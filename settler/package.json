@@ -1,9 +1,9 @@
 {
-  "name": "ante-rotation",
+  "name": "ante-settler",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node rotate.mjs"
+    "start": "node settle.mjs"
   },
   "engines": {
     "node": "20.x"

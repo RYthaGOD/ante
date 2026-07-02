@@ -1,14 +1,16 @@
-// ANTE market rotation engine. Keeps a small set of rotating markets live: each
-// run it settles any rotation market whose window has passed ("expires" it) and
-// seeds a replacement from the pool — so a new market only appears when one
-// expires. Designed to run on a schedule (Railway cron).
+// ANTE market keeper. Each run it tops the board back up to ROT_TARGET open
+// markets by pulling upcoming World Cup fixtures from the live TxODDS feed and
+// seeding a market for any that isn't on-chain yet. Settlement is handled by the
+// settler service. Runs on a Railway cron.
 //
 // Env:
 //   ANCHOR_PROVIDER_URL  RPC (default devnet)
-//   ROTATE_SECRET        market authority/oracle secret-key JSON array (Railway)
-//                        — must be the same authority the web derives PDAs with.
-//   ROT_TARGET           how many rotation markets to keep open (default 3)
-//   ROT_WINDOW_HOURS     lifespan of each rotation market (default 6)
+//   ROTATE_SECRET        market authority secret-key JSON array (Railway) — must
+//                        be the authority the web derives PDAs with.
+//   TXODDS_API_TOKEN     long-lived TxODDS API token (guest JWT auto-refreshed)
+//   TXODDS_BASE_URL      default https://txline.txodds.com
+//   ROT_TARGET           how many markets to keep open (default 10)
+//   TXODDS_COMPETITION   competition id to pull fixtures from (default 72 = WC)
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
@@ -18,11 +20,12 @@ const { web3, AnchorProvider, Program, BN, Wallet } = anchor;
 const here = (rel) => fileURLToPath(new URL(rel, import.meta.url));
 
 const idl = JSON.parse(readFileSync(here("./idl.json"), "utf8"));
-const pool = JSON.parse(readFileSync(here("./pool.json"), "utf8"));
-const PROGRAM_ID = new web3.PublicKey(idl.address);
+const teams = JSON.parse(readFileSync(here("./teams.json"), "utf8")).teams;
 const RPC = process.env.ANCHOR_PROVIDER_URL || "https://api.devnet.solana.com";
-const TARGET = Number(process.env.ROT_TARGET || 3);
-const WINDOW_H = Number(process.env.ROT_WINDOW_HOURS || 6);
+const BASE = process.env.TXODDS_BASE_URL || "https://txline.txodds.com";
+const API = process.env.TXODDS_API_TOKEN;
+const TARGET = Number(process.env.ROT_TARGET || 10);
+const COMP = process.env.TXODDS_COMPETITION || "72";
 
 function loadWallet() {
   if (process.env.ROTATE_SECRET)
@@ -36,58 +39,71 @@ const conn = new web3.Connection(RPC, "confirmed");
 const program = new Program(idl, new AnchorProvider(conn, new Wallet(kp), { commitment: "confirmed" }));
 
 const marketPda = (id) =>
-  web3.PublicKey.findProgramAddressSync([Buffer.from("market"), AUTH.toBuffer(), Buffer.from(id)], PROGRAM_ID)[0];
-const kindArg = (k) => (k === "home_win" ? { homeWin: {} } : k === "over_2_5" ? { over25: {} } : { custom: {} });
-const sha = (s) => Array.from(createHash("sha256").update(s).digest());
+  web3.PublicKey.findProgramAddressSync([Buffer.from("market"), AUTH.toBuffer(), Buffer.from(id)], program.programId)[0];
+const kindArg = (k) => (k === "home_win" ? { homeWin: {} } : { over25: {} });
 const nowSec = () => Math.floor(Date.now() / 1000);
-const rnd = (n) => Math.floor(Math.random() * n);
 
-async function settle(m) {
-  const mkt = marketPda(m.id);
-  if (m.kind === "custom") {
-    const outcome = Math.random() < 0.5 ? "YES" : "NO";
-    await program.methods
-      .postCustomResult(outcome === "YES" ? { yes: {} } : { no: {} }, sha(`${m.id}:${outcome}`))
-      .accountsPartial({ market: mkt, oracle: AUTH })
-      .rpc();
-    return `expired+settled ${m.id} -> ${outcome}`;
+// feed team name (or alias) -> 3-letter slug code
+const NAME2CODE = {};
+for (const t of teams) { NAME2CODE[t.name.toLowerCase()] = t.code; for (const a of t.aliases) NAME2CODE[a] = t.code; }
+const code = (name) => NAME2CODE[String(name || "").toLowerCase()] || null;
+
+async function retry(fn, tries = 5) {
+  let last;
+  for (let i = 0; i < tries; i++) {
+    try { return await fn(); } catch (e) { last = e; await new Promise((r) => setTimeout(r, 700 * (i + 1))); }
   }
-  const home = rnd(4), away = rnd(4);
-  await program.methods
-    .postResult(home, away, sha(`${m.id}:${home}:${away}`))
-    .accountsPartial({ market: mkt, oracle: AUTH })
-    .rpc();
-  return `expired+settled ${m.id} ${home}-${away}`;
+  throw last;
+}
+async function freshJwt() {
+  const r = await fetch(`${BASE}/auth/guest/start`, { method: "POST" });
+  const t = await r.text();
+  try { return JSON.parse(t).token; } catch { return t.trim(); }
 }
 
-async function seed(m) {
+async function seed(c) {
   await program.methods
-    .initializeMarket(m.id, m.fixtureId || "", kindArg(m.kind), new BN(nowSec() + WINDOW_H * 3600))
-    .accountsPartial({ market: marketPda(m.id), authority: AUTH, systemProgram: web3.SystemProgram.programId })
+    .initializeMarket(c.marketId, String(c.fixtureId), kindArg(c.kind), new BN(c.settleAfter))
+    .accountsPartial({ market: marketPda(c.marketId), authority: AUTH, systemProgram: web3.SystemProgram.programId })
     .rpc();
-  return `seeded replacement ${m.id} (window ${WINDOW_H}h)`;
+  return `seeded ${c.marketId} (closes ${new Date(c.settleAfter * 1000).toISOString().slice(0, 16)})`;
 }
 
 (async () => {
-  const accts = await program.account.market.fetchMultiple(pool.map((m) => marketPda(m.id)));
-  let open = 0;
-  const expired = [];
-  const unseeded = [];
-  pool.forEach((m, i) => {
-    const a = accts[i];
-    if (!a) return unseeded.push(m);
-    if ("resolved" in a.status) return; // already settled this cycle
-    if (a.settleAfter.toNumber() <= nowSec()) expired.push(m);
-    else open++;
-  });
+  if (!API) throw new Error("TXODDS_API_TOKEN not set");
 
-  for (const m of expired) {
-    try { console.log(await settle(m)); } catch (e) { console.log("settle err", m.id, String(e.message).slice(0, 90)); }
+  // 1. what's already on-chain (by fixture slug) + how many are open
+  const all = await retry(() =>
+    program.account.market.all([{ memcmp: { offset: 8, bytes: AUTH.toBase58() } }]),
+  );
+  const existingSlugs = new Set(all.map((m) => m.account.marketId.split(":")[0]));
+  let open = all.filter((m) => "open" in m.account.status && m.account.settleAfter.toNumber() > nowSec()).length;
+
+  // 2. upcoming fixtures from the live feed
+  const jwt = await freshJwt();
+  const url = new URL(`${BASE}/api/fixtures/snapshot`);
+  url.searchParams.set("competitionId", COMP);
+  const rows = await (await fetch(url, { headers: { Authorization: `Bearer ${jwt}`, "X-Api-Token": API } })).json();
+  const now = nowSec();
+  const candidates = [];
+  for (const r of (rows || [])) {
+    const start = Math.floor((r.StartTime ?? 0) / 1000);
+    if (start < now + 3600) continue; // must leave a betting window (>1h out)
+    const hc = code(r.Participant1), ac = code(r.Participant2);
+    if (!hc || !ac) continue; // unknown team -> skip (can't render)
+    const slug = `wc26-${hc}-${ac}`;
+    if (existingSlugs.has(slug)) continue; // already have a market for this fixture
+    const kind = r.FixtureId % 2 === 0 ? "home_win" : "over_2_5";
+    candidates.push({ marketId: `${slug}:${kind}`, fixtureId: r.FixtureId, kind, settleAfter: start, slug });
   }
-  // Replace expired markets (open dropped below target) from the dormant pool.
-  for (const m of unseeded) {
+  candidates.sort((a, b) => a.settleAfter - b.settleAfter);
+
+  // 3. seed the soonest fixtures until we're back to TARGET open
+  let seeded = 0;
+  for (const c of candidates) {
     if (open >= TARGET) break;
-    try { console.log(await seed(m)); open++; } catch (e) { console.log("seed err", m.id, String(e.message).slice(0, 90)); }
+    try { console.log(await seed(c)); existingSlugs.add(c.slug); open++; seeded++; }
+    catch (e) { console.log("seed err", c.marketId, String(e.message).slice(0, 90)); }
   }
-  console.log(`rotation done · open=${open}/${TARGET} · expired=${expired.length} · unseeded-left=${unseeded.length - Math.max(0, TARGET - (open - expired.length))}`);
+  console.log(`keeper done · open=${open}/${TARGET} · seeded=${seeded} · candidates-left=${candidates.length - seeded}`);
 })().catch((e) => { console.error("ROTATE ERROR", e?.message || e); process.exit(1); });
