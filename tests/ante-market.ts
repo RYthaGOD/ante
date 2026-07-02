@@ -38,6 +38,9 @@ describe("ante-market", () => {
       program.programId
     )[0];
 
+  const nowSec = () => Math.floor(Date.now() / 1000);
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
   const alice = Keypair.generate();
   const bob = Keypair.generate();
 
@@ -51,8 +54,9 @@ describe("ante-market", () => {
   it("settles a SCORE market computed on-chain and pays the winner", async () => {
     const marketId = "wc2026-m01:home_win";
     const market = marketPda(marketId);
+    // Cutoff a few seconds out so bets land first; settlement opens once it passes.
     await program.methods
-      .initializeMarket(marketId, "wc2026-m01", { homeWin: {} }, new BN(0))
+      .initializeMarket(marketId, "wc2026-m01", { homeWin: {} }, new BN(nowSec() + 3))
       .accountsPartial({ market, authority: authority.publicKey, systemProgram: SystemProgram.programId })
       .rpc();
 
@@ -65,6 +69,7 @@ describe("ante-market", () => {
       .accountsPartial({ market, bet: betPda(market, bob.publicKey, NO), bettor: bob.publicKey, systemProgram: SystemProgram.programId })
       .signers([bob]).rpc();
 
+    await sleep(6000); // pass the betting cutoff so settlement is allowed
     // Brazil 2-0 -> HomeWin YES; program computes the winner from the score.
     await program.methods
       .postResult(2, 0, scoreDigest(marketId, 2, 0))
@@ -86,7 +91,7 @@ describe("ante-market", () => {
     const marketId = "wc2026:croatia-golden-boot";
     const market = marketPda(marketId);
     await program.methods
-      .initializeMarket(marketId, "", { custom: {} }, new BN(0))
+      .initializeMarket(marketId, "", { custom: {} }, new BN(nowSec() + 3))
       .accountsPartial({ market, authority: authority.publicKey, systemProgram: SystemProgram.programId })
       .rpc();
 
@@ -95,6 +100,7 @@ describe("ante-market", () => {
       .accountsPartial({ market, bet: betPda(market, alice.publicKey, YES), bettor: alice.publicKey, systemProgram: SystemProgram.programId })
       .signers([alice]).rpc();
 
+    await sleep(6000); // pass the betting cutoff so settlement is allowed
     // Feeder asserts YES directly; digest binds the posted outcome on-chain.
     await program.methods
       .postCustomResult({ yes: {} }, customDigest(marketId, "YES"))
@@ -147,5 +153,53 @@ describe("ante-market", () => {
     } catch (e: any) {
       assert.include(e.toString(), "WrongKind");
     }
+  });
+
+  it("rejects bets once the cutoff has passed", async () => {
+    const marketId = "wc2026-m04:home_win";
+    const market = marketPda(marketId);
+    await program.methods
+      .initializeMarket(marketId, "wc2026-m04", { homeWin: {} }, new BN(nowSec() - 10)) // cutoff already passed
+      .accountsPartial({ market, authority: authority.publicKey, systemProgram: SystemProgram.programId })
+      .rpc();
+    try {
+      await program.methods
+        .placeBet({ yes: {} }, new BN(LAMPORTS_PER_SOL))
+        .accountsPartial({ market, bet: betPda(market, alice.publicKey, YES), bettor: alice.publicKey, systemProgram: SystemProgram.programId })
+        .signers([alice]).rpc();
+      assert.fail("expected BettingClosed");
+    } catch (e: any) {
+      assert.include(e.toString(), "BettingClosed");
+    }
+  });
+
+  it("close_market refuses a funded market but reclaims an empty one", async () => {
+    // A market that holds staked funds cannot be closed (no draining stakes).
+    const funded = "wc2026-m05:home_win";
+    const fm = marketPda(funded);
+    await program.methods
+      .initializeMarket(funded, "wc2026-m05", { homeWin: {} }, new BN(nowSec() + 60))
+      .accountsPartial({ market: fm, authority: authority.publicKey, systemProgram: SystemProgram.programId })
+      .rpc();
+    await program.methods
+      .placeBet({ yes: {} }, new BN(LAMPORTS_PER_SOL))
+      .accountsPartial({ market: fm, bet: betPda(fm, alice.publicKey, YES), bettor: alice.publicKey, systemProgram: SystemProgram.programId })
+      .signers([alice]).rpc();
+    try {
+      await program.methods.closeMarket().accountsPartial({ market: fm, authority: authority.publicKey }).rpc();
+      assert.fail("expected MarketHasFunds");
+    } catch (e: any) {
+      assert.include(e.toString(), "MarketHasFunds");
+    }
+
+    // An empty market can be reclaimed.
+    const empty = "wc2026-m06:home_win";
+    const em = marketPda(empty);
+    await program.methods
+      .initializeMarket(empty, "wc2026-m06", { homeWin: {} }, new BN(nowSec() + 60))
+      .accountsPartial({ market: em, authority: authority.publicKey, systemProgram: SystemProgram.programId })
+      .rpc();
+    await program.methods.closeMarket().accountsPartial({ market: em, authority: authority.publicKey }).rpc();
+    assert.isNull(await program.account.market.fetchNullable(em));
   });
 });

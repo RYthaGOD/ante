@@ -37,6 +37,34 @@
       "args": []
     },
     {
+      "name": "close_market",
+      "discriminator": [
+        88,
+        154,
+        248,
+        186,
+        48,
+        14,
+        123,
+        244
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "initialize_market",
       "discriminator": [
         35,
@@ -238,6 +266,38 @@
           }
         }
       ]
+    },
+    {
+      "name": "set_settle_after",
+      "discriminator": [
+        151,
+        61,
+        236,
+        240,
+        163,
+        251,
+        49,
+        97
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_settle_after",
+          "type": "i64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -311,61 +371,71 @@
     },
     {
       "code": 6005,
+      "name": "BettingClosed",
+      "msg": "betting is closed for this market"
+    },
+    {
+      "code": 6006,
+      "name": "MarketHasFunds",
+      "msg": "cannot close a market that still holds staked funds"
+    },
+    {
+      "code": 6007,
       "name": "Overflow",
       "msg": "arithmetic overflow"
     },
     {
-      "code": 6006,
+      "code": 6008,
       "name": "AlreadyResolved",
       "msg": "market already resolved"
     },
     {
-      "code": 6007,
+      "code": 6009,
       "name": "NotOracle",
       "msg": "signer is not the market oracle"
     },
     {
-      "code": 6008,
+      "code": 6010,
       "name": "TooEarly",
       "msg": "too early to settle"
     },
     {
-      "code": 6009,
+      "code": 6011,
       "name": "WrongKind",
       "msg": "wrong settlement instruction for this market kind"
     },
     {
-      "code": 6010,
+      "code": 6012,
       "name": "DigestMismatch",
       "msg": "result digest does not match posted result"
     },
     {
-      "code": 6011,
+      "code": 6013,
       "name": "NotResolved",
       "msg": "market not resolved yet"
     },
     {
-      "code": 6012,
+      "code": 6014,
       "name": "AlreadyClaimed",
       "msg": "bet already claimed"
     },
     {
-      "code": 6013,
+      "code": 6015,
       "name": "NotAWinner",
       "msg": "bet is not on the winning outcome"
     },
     {
-      "code": 6014,
+      "code": 6016,
       "name": "NoWinners",
       "msg": "no winning stake in pool"
     },
     {
-      "code": 6015,
+      "code": 6017,
       "name": "WrongMarket",
       "msg": "bet does not belong to this market"
     },
     {
-      "code": 6016,
+      "code": 6018,
       "name": "NotYourBet",
       "msg": "bet does not belong to this signer"
     }

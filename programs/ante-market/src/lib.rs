@@ -54,6 +54,12 @@ pub mod ante_market {
         require!(amount > 0, AnteError::ZeroAmount);
         require!(matches!(outcome, Outcome::Yes | Outcome::No), AnteError::BadOutcome);
         require!(ctx.accounts.market.status == MarketStatus::Open, AnteError::MarketClosed);
+        // Betting closes at the market's settle_after (set to kickoff): no wagering
+        // once the match is under way.
+        require!(
+            Clock::get()?.unix_timestamp < ctx.accounts.market.settle_after,
+            AnteError::BettingClosed
+        );
 
         // Move the stake from the bettor into the market PDA, which is the vault.
         anchor_lang::system_program::transfer(
@@ -182,6 +188,28 @@ pub mod ante_market {
         **bettor_ai.try_borrow_mut_lamports()? += payout;
 
         ctx.accounts.bet.claimed = true;
+        Ok(())
+    }
+
+    // Admin: move an open market's betting/settle cutoff (e.g. to its kickoff).
+    pub fn set_settle_after(ctx: Context<UpdateMarket>, new_settle_after: i64) -> Result<()> {
+        require!(
+            ctx.accounts.market.status == MarketStatus::Open,
+            AnteError::AlreadyResolved
+        );
+        ctx.accounts.market.settle_after = new_settle_after;
+        Ok(())
+    }
+
+    // Admin: reclaim an abandoned market account (rent returned to authority).
+    // Authority-gated cleanup for markets no longer listed in the catalogue.
+    // Refuses to close any market that still holds staked funds, so the authority
+    // can never drain bettor stakes.
+    pub fn close_market(ctx: Context<CloseMarket>) -> Result<()> {
+        require!(
+            ctx.accounts.market.pool_yes == 0 && ctx.accounts.market.pool_no == 0,
+            AnteError::MarketHasFunds
+        );
         Ok(())
     }
 }
@@ -324,6 +352,21 @@ pub struct PostResult<'info> {
 }
 
 #[derive(Accounts)]
+pub struct UpdateMarket<'info> {
+    #[account(mut, has_one = authority)]
+    pub market: Account<'info, Market>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct CloseMarket<'info> {
+    #[account(mut, close = authority, has_one = authority)]
+    pub market: Account<'info, Market>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
 pub struct Claim<'info> {
     #[account(mut)]
     pub market: Account<'info, Market>,
@@ -345,6 +388,10 @@ pub enum AnteError {
     BadOutcome,
     #[msg("market is not open")]
     MarketClosed,
+    #[msg("betting is closed for this market")]
+    BettingClosed,
+    #[msg("cannot close a market that still holds staked funds")]
+    MarketHasFunds,
     #[msg("arithmetic overflow")]
     Overflow,
     #[msg("market already resolved")]
