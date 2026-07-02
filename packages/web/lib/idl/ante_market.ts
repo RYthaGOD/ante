@@ -140,6 +140,14 @@ export type AnteMarket = {
         {
           "name": "settleAfter",
           "type": "i64"
+        },
+        {
+          "name": "feeBps",
+          "type": "u16"
+        },
+        {
+          "name": "feedPubkey",
+          "type": "pubkey"
         }
       ]
     },
@@ -209,6 +217,13 @@ export type AnteMarket = {
         {
           "name": "oracle",
           "signer": true
+        },
+        {
+          "name": "instructions",
+          "docs": [
+            "the sysvar loader for ed25519 introspection."
+          ],
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": [
@@ -251,6 +266,13 @@ export type AnteMarket = {
         {
           "name": "oracle",
           "signer": true
+        },
+        {
+          "name": "instructions",
+          "docs": [
+            "the sysvar loader for ed25519 introspection."
+          ],
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": [
@@ -270,6 +292,70 @@ export type AnteMarket = {
               32
             ]
           }
+        }
+      ]
+    },
+    {
+      "name": "setFeed",
+      "discriminator": [
+        79,
+        150,
+        2,
+        207,
+        41,
+        104,
+        77,
+        41
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "newFeed",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "setOracle",
+      "discriminator": [
+        186,
+        128,
+        81,
+        104,
+        74,
+        79,
+        18,
+        224
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "newOracle",
+          "type": "pubkey"
         }
       ]
     },
@@ -304,6 +390,33 @@ export type AnteMarket = {
           "type": "i64"
         }
       ]
+    },
+    {
+      "name": "voidMarket",
+      "discriminator": [
+        243,
+        175,
+        46,
+        124,
+        95,
+        101,
+        39,
+        69
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -347,6 +460,19 @@ export type AnteMarket = {
         199,
         202
       ]
+    },
+    {
+      "name": "marketVoided",
+      "discriminator": [
+        217,
+        12,
+        138,
+        39,
+        108,
+        75,
+        89,
+        26
+      ]
     }
   ],
   "errors": [
@@ -362,86 +488,111 @@ export type AnteMarket = {
     },
     {
       "code": 6002,
+      "name": "feeTooHigh",
+      "msg": "fee exceeds the maximum"
+    },
+    {
+      "code": 6003,
       "name": "zeroAmount",
       "msg": "amount must be greater than zero"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "badOutcome",
       "msg": "outcome must be Yes or No"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "marketClosed",
       "msg": "market is not open"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "bettingClosed",
       "msg": "betting is closed for this market"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "marketHasFunds",
       "msg": "cannot close a market that still holds staked funds"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "overflow",
       "msg": "arithmetic overflow"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "alreadyResolved",
       "msg": "market already resolved"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "notOracle",
       "msg": "signer is not the market oracle"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "tooEarly",
       "msg": "too early to settle"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "wrongKind",
       "msg": "wrong settlement instruction for this market kind"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "digestMismatch",
       "msg": "result digest does not match posted result"
     },
     {
-      "code": 6013,
+      "code": 6014,
+      "name": "missingFeedSignature",
+      "msg": "missing ed25519 feed signature instruction"
+    },
+    {
+      "code": 6015,
+      "name": "malformedFeedSignature",
+      "msg": "malformed ed25519 feed signature instruction"
+    },
+    {
+      "code": 6016,
+      "name": "wrongFeedSigner",
+      "msg": "feed signature is not from this market's feed key"
+    },
+    {
+      "code": 6017,
+      "name": "wrongFeedMessage",
+      "msg": "feed signature covers a different result"
+    },
+    {
+      "code": 6018,
       "name": "notResolved",
       "msg": "market not resolved yet"
     },
     {
-      "code": 6014,
+      "code": 6019,
       "name": "alreadyClaimed",
       "msg": "bet already claimed"
     },
     {
-      "code": 6015,
+      "code": 6020,
       "name": "notAWinner",
       "msg": "bet is not on the winning outcome"
     },
     {
-      "code": 6016,
+      "code": 6021,
       "name": "noWinners",
       "msg": "no winning stake in pool"
     },
     {
-      "code": 6017,
+      "code": 6022,
       "name": "wrongMarket",
       "msg": "bet does not belong to this market"
     },
     {
-      "code": 6018,
+      "code": 6023,
       "name": "notYourBet",
       "msg": "bet does not belong to this signer"
     }
@@ -497,6 +648,10 @@ export type AnteMarket = {
             "type": "pubkey"
           },
           {
+            "name": "feedPubkey",
+            "type": "pubkey"
+          },
+          {
             "name": "marketId",
             "type": "string"
           },
@@ -523,6 +678,10 @@ export type AnteMarket = {
           {
             "name": "settleAfter",
             "type": "i64"
+          },
+          {
+            "name": "feeBps",
+            "type": "u16"
           },
           {
             "name": "poolYes",
@@ -602,6 +761,22 @@ export type AnteMarket = {
                 32
               ]
             }
+          },
+          {
+            "name": "homeGoals",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "awayGoals",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "feedVerified",
+            "type": "bool"
           }
         ]
       }
@@ -616,6 +791,25 @@ export type AnteMarket = {
           },
           {
             "name": "resolved"
+          },
+          {
+            "name": "voided"
+          }
+        ]
+      }
+    },
+    {
+      "name": "marketVoided",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "marketId",
+            "type": "string"
           }
         ]
       }

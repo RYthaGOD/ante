@@ -134,6 +134,14 @@
         {
           "name": "settle_after",
           "type": "i64"
+        },
+        {
+          "name": "fee_bps",
+          "type": "u16"
+        },
+        {
+          "name": "feed_pubkey",
+          "type": "pubkey"
         }
       ]
     },
@@ -203,6 +211,13 @@
         {
           "name": "oracle",
           "signer": true
+        },
+        {
+          "name": "instructions",
+          "docs": [
+            "the sysvar loader for ed25519 introspection."
+          ],
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": [
@@ -245,6 +260,13 @@
         {
           "name": "oracle",
           "signer": true
+        },
+        {
+          "name": "instructions",
+          "docs": [
+            "the sysvar loader for ed25519 introspection."
+          ],
+          "address": "Sysvar1nstructions1111111111111111111111111"
         }
       ],
       "args": [
@@ -264,6 +286,70 @@
               32
             ]
           }
+        }
+      ]
+    },
+    {
+      "name": "set_feed",
+      "discriminator": [
+        79,
+        150,
+        2,
+        207,
+        41,
+        104,
+        77,
+        41
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_feed",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "set_oracle",
+      "discriminator": [
+        186,
+        128,
+        81,
+        104,
+        74,
+        79,
+        18,
+        224
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_oracle",
+          "type": "pubkey"
         }
       ]
     },
@@ -298,6 +384,33 @@
           "type": "i64"
         }
       ]
+    },
+    {
+      "name": "void_market",
+      "discriminator": [
+        243,
+        175,
+        46,
+        124,
+        95,
+        101,
+        39,
+        69
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "market"
+          ]
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -341,6 +454,19 @@
         199,
         202
       ]
+    },
+    {
+      "name": "MarketVoided",
+      "discriminator": [
+        217,
+        12,
+        138,
+        39,
+        108,
+        75,
+        89,
+        26
+      ]
     }
   ],
   "errors": [
@@ -356,86 +482,111 @@
     },
     {
       "code": 6002,
+      "name": "FeeTooHigh",
+      "msg": "fee exceeds the maximum"
+    },
+    {
+      "code": 6003,
       "name": "ZeroAmount",
       "msg": "amount must be greater than zero"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "BadOutcome",
       "msg": "outcome must be Yes or No"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "MarketClosed",
       "msg": "market is not open"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "BettingClosed",
       "msg": "betting is closed for this market"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "MarketHasFunds",
       "msg": "cannot close a market that still holds staked funds"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "Overflow",
       "msg": "arithmetic overflow"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "AlreadyResolved",
       "msg": "market already resolved"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "NotOracle",
       "msg": "signer is not the market oracle"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "TooEarly",
       "msg": "too early to settle"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "WrongKind",
       "msg": "wrong settlement instruction for this market kind"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "DigestMismatch",
       "msg": "result digest does not match posted result"
     },
     {
-      "code": 6013,
+      "code": 6014,
+      "name": "MissingFeedSignature",
+      "msg": "missing ed25519 feed signature instruction"
+    },
+    {
+      "code": 6015,
+      "name": "MalformedFeedSignature",
+      "msg": "malformed ed25519 feed signature instruction"
+    },
+    {
+      "code": 6016,
+      "name": "WrongFeedSigner",
+      "msg": "feed signature is not from this market's feed key"
+    },
+    {
+      "code": 6017,
+      "name": "WrongFeedMessage",
+      "msg": "feed signature covers a different result"
+    },
+    {
+      "code": 6018,
       "name": "NotResolved",
       "msg": "market not resolved yet"
     },
     {
-      "code": 6014,
+      "code": 6019,
       "name": "AlreadyClaimed",
       "msg": "bet already claimed"
     },
     {
-      "code": 6015,
+      "code": 6020,
       "name": "NotAWinner",
       "msg": "bet is not on the winning outcome"
     },
     {
-      "code": 6016,
+      "code": 6021,
       "name": "NoWinners",
       "msg": "no winning stake in pool"
     },
     {
-      "code": 6017,
+      "code": 6022,
       "name": "WrongMarket",
       "msg": "bet does not belong to this market"
     },
     {
-      "code": 6018,
+      "code": 6023,
       "name": "NotYourBet",
       "msg": "bet does not belong to this signer"
     }
@@ -491,6 +642,10 @@
             "type": "pubkey"
           },
           {
+            "name": "feed_pubkey",
+            "type": "pubkey"
+          },
+          {
             "name": "market_id",
             "type": "string"
           },
@@ -517,6 +672,10 @@
           {
             "name": "settle_after",
             "type": "i64"
+          },
+          {
+            "name": "fee_bps",
+            "type": "u16"
           },
           {
             "name": "pool_yes",
@@ -596,6 +755,22 @@
                 32
               ]
             }
+          },
+          {
+            "name": "home_goals",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "away_goals",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "feed_verified",
+            "type": "bool"
           }
         ]
       }
@@ -610,6 +785,25 @@
           },
           {
             "name": "Resolved"
+          },
+          {
+            "name": "Voided"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketVoided",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "market_id",
+            "type": "string"
           }
         ]
       }

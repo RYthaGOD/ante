@@ -11,6 +11,9 @@
 //   TXODDS_BASE_URL      default https://txline.txodds.com
 //   ROT_TARGET           how many markets to keep open (default 10)
 //   TXODDS_COMPETITION   competition id to pull fixtures from (default 72 = WC)
+//   FEED_PUBKEY          base58 feed signing pubkey new markets must verify
+//                        against (public key only — the secret lives with the
+//                        settler); omit to seed unbound markets
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
@@ -38,6 +41,17 @@ const AUTH = kp.publicKey;
 const conn = new web3.Connection(RPC, "confirmed");
 const program = new Program(idl, new AnchorProvider(conn, new Wallet(kp), { commitment: "confirmed" }));
 
+// Feed signing pubkey for new markets: env, or derived from the repo-root
+// keypair on local runs. Default = markets settle without a feed signature.
+function feedPubkey() {
+  if (process.env.FEED_PUBKEY) return new web3.PublicKey(process.env.FEED_PUBKEY);
+  try {
+    const raw = readFileSync(here("../.feed-signer-keypair.json"), "utf8");
+    return web3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw))).publicKey;
+  } catch { return web3.PublicKey.default; }
+}
+const FEED_PK = feedPubkey();
+
 const marketPda = (id) =>
   web3.PublicKey.findProgramAddressSync([Buffer.from("market"), AUTH.toBuffer(), Buffer.from(id)], program.programId)[0];
 const kindArg = (k) => (k === "home_win" ? { homeWin: {} } : { over25: {} });
@@ -63,7 +77,7 @@ async function freshJwt() {
 
 async function seed(c) {
   await program.methods
-    .initializeMarket(c.marketId, String(c.fixtureId), kindArg(c.kind), new BN(c.settleAfter))
+    .initializeMarket(c.marketId, String(c.fixtureId), kindArg(c.kind), new BN(c.settleAfter), 0, FEED_PK)
     .accountsPartial({ market: marketPda(c.marketId), authority: AUTH, systemProgram: web3.SystemProgram.programId })
     .rpc();
   return `seeded ${c.marketId} (closes ${new Date(c.settleAfter * 1000).toISOString().slice(0, 16)})`;
@@ -72,10 +86,19 @@ async function seed(c) {
 (async () => {
   if (!API) throw new Error("TXODDS_API_TOKEN not set");
 
-  // 1. what's already on-chain (by fixture slug) + how many are open
-  const all = await retry(() =>
-    program.account.market.all([{ memcmp: { offset: 8, bytes: AUTH.toBase58() } }]),
+  // 1. what's already on-chain (by fixture slug) + how many are open —
+  // decoded per-account so legacy layouts can't abort the run
+  const raw = await retry(() =>
+    conn.getProgramAccounts(program.programId, {
+      commitment: "confirmed",
+      filters: [{ memcmp: { offset: 8, bytes: AUTH.toBase58() } }],
+    }),
   );
+  const all = [];
+  for (const { pubkey, account } of raw) {
+    try { all.push({ publicKey: pubkey, account: program.coder.accounts.decode("market", account.data) }); }
+    catch { /* skip */ }
+  }
   const existingSlugs = new Set(all.map((m) => m.account.marketId.split(":")[0]));
   let open = all.filter((m) => "open" in m.account.status && m.account.settleAfter.toNumber() > nowSec()).length;
 

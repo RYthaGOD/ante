@@ -20,8 +20,9 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
   const [amount, setAmount] = useState("0.1");
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  // Whether THIS wallet has an unclaimed winning position on a resolved market.
-  const [claimable, setClaimable] = useState(false);
+  // The outcome byte THIS wallet can claim: a winning bet on a resolved market,
+  // or either side's stake refund on a voided one. null = nothing to claim.
+  const [claimOutcome, setClaimOutcome] = useState<number | null>(null);
 
   const yes = account.poolYes.toNumber() / LAMPORTS_PER_SOL;
   const no = account.poolNo.toNumber() / LAMPORTS_PER_SOL;
@@ -40,30 +41,43 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
     return p === null ? null : `◎${p.toFixed(2)} (×${(p / stake).toFixed(2)})`;
   };
   const resolved = "resolved" in account.status;
+  const voided = "voided" in account.status;
   const winner: "YES" | "NO" | null = resolved ? ("yes" in account.winningOutcome ? "YES" : "NO") : null;
   const kind: MarketKind =
     "homeWin" in account.kind ? "home_win" : "over25" in account.kind ? "over_2_5" : "custom";
   const resolveDate = new Date(account.settleAfter.toNumber() * 1000);
 
   // Only surface a Claim button when this wallet actually holds an unclaimed
-  // winning bet — otherwise resolved markets just show the proof.
+  // position: the winning side on a resolved market, either side on a voided one.
   useEffect(() => {
     let live = true;
-    if (!resolved || !wallet || !winner) {
-      setClaimable(false);
+    if ((!resolved && !voided) || !wallet) {
+      setClaimOutcome(null);
       return;
     }
-    const outcomeByte = winner === "YES" ? 1 : 2;
-    getReadonlyProgram(connection)
-      .account.bet.fetchNullable(betPda(market.publicKey, wallet.publicKey, outcomeByte))
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((b: any) => live && setClaimable(!!b && !b.claimed && b.amount.toNumber() > 0))
-      .catch(() => live && setClaimable(false));
+    const candidates = voided ? [1, 2] : [winner === "YES" ? 1 : 2];
+    (async () => {
+      for (const ob of candidates) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const b: any = await getReadonlyProgram(connection).account.bet.fetchNullable(
+            betPda(market.publicKey, wallet.publicKey, ob),
+          );
+          if (b && !b.claimed && b.amount.toNumber() > 0) {
+            if (live) setClaimOutcome(ob);
+            return;
+          }
+        } catch {
+          /* try the other side */
+        }
+      }
+      if (live) setClaimOutcome(null);
+    })();
     return () => {
       live = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolved, winner, wallet, connection, market.publicKey]);
+  }, [resolved, voided, winner, wallet, connection, market.publicKey]);
 
   async function send(action: "yes" | "no" | "claim") {
     if (!wallet) return;
@@ -72,16 +86,16 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
     try {
       const program = getProgram(new AnchorProvider(connection, wallet, { commitment: "confirmed" }));
       if (action === "claim") {
-        const outcomeByte = winner === "YES" ? 1 : 2;
+        if (claimOutcome === null) return;
         await program.methods
           .claim()
           .accountsPartial({
             market: market.publicKey,
-            bet: betPda(market.publicKey, wallet.publicKey, outcomeByte),
+            bet: betPda(market.publicKey, wallet.publicKey, claimOutcome),
             bettor: wallet.publicKey,
           })
           .rpc();
-        setClaimable(false);
+        setClaimOutcome(null);
       } else {
         const outcomeByte = action === "yes" ? 1 : 2;
         const lamports = new BN(Math.floor(parseFloat(amount) * LAMPORTS_PER_SOL));
@@ -138,9 +152,27 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
               marketId={account.marketId}
               kind={kind}
             />
-            {wallet && claimable && (
+            {wallet && claimOutcome !== null && (
               <button className="btn btn-claim" disabled={busy !== null} onClick={() => send("claim")}>
                 {busy === "claim" ? "Claiming…" : `Claim ${winner} winnings`}
+              </button>
+            )}
+          </>
+        ) : voided ? (
+          <>
+            <div className="proof">
+              <div className="proof-head">
+                <span className="proof-label" style={{ color: "var(--muted)" }}>∅ Market voided</span>
+                <span className="pill">VOID</span>
+              </div>
+              <div className="proof-note">
+                The fixture never produced a result, so every stake is refundable in full — no
+                house discretion, enforced by the program.
+              </div>
+            </div>
+            {wallet && claimOutcome !== null && (
+              <button className="btn btn-claim" disabled={busy !== null} onClick={() => send("claim")}>
+                {busy === "claim" ? "Reclaiming…" : "Reclaim your stake"}
               </button>
             )}
           </>

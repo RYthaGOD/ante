@@ -226,6 +226,7 @@ name = "ante-market"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "solana-sdk-ids",
  "solana-sha256-hasher",
 ]
 

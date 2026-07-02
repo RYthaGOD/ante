@@ -48,7 +48,7 @@ const check = (name: string, ok: boolean, detail = "") => {
   console.log(`\nDEVNET E2E  program=${PROGRAM_ID.toBase58()}  market=${id}\n`);
 
   // 1. create market
-  await mainProgram.methods.initializeMarket(id, "", { custom: {} }, new BN(settleAfter))
+  await mainProgram.methods.initializeMarket(id, "", { custom: {} }, new BN(settleAfter), 0, web3.PublicKey.default)
     .accountsPartial({ market: mkt, authority: AUTH, systemProgram: web3.SystemProgram.programId }).rpc();
   let m: any = await mainProgram.account.market.fetch(mkt);
   check("initialize_market", "open" in m.status && m.marketId === id);

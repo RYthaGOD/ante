@@ -6,6 +6,9 @@
 // Env:
 //   ANCHOR_PROVIDER_URL  RPC (default devnet)
 //   SETTLER_SECRET       oracle/authority secret-key JSON array (Railway)
+//   FEED_SECRET          feed signing keypair JSON array — signs each result so
+//                        the program's ed25519 check anchors the score to the
+//                        feed, not to the oracle (required for feed-bound markets)
 //   TXODDS_API_TOKEN     long-lived TxODDS API token (required)
 //   TXODDS_BASE_URL      default https://txline.txodds.com
 import { readFileSync } from "node:fs";
@@ -32,6 +35,15 @@ const kp = loadWallet();
 const AUTH = kp.publicKey;
 const conn = new web3.Connection(RPC, "confirmed");
 const program = new Program(idl, new AnchorProvider(conn, new Wallet(kp), { commitment: "confirmed" }));
+
+// Feed signing keypair: FEED_SECRET on Railway, repo-root file for local runs.
+function loadFeedSigner() {
+  try {
+    const raw = process.env.FEED_SECRET ?? readFileSync(here("../.feed-signer-keypair.json"), "utf8");
+    return web3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
+  } catch { return null; }
+}
+const FEED = loadFeedSigner();
 
 const sha = (s) => Array.from(createHash("sha256").update(s).digest());
 const nowSec = () => Math.floor(Date.now() / 1000);
@@ -84,11 +96,26 @@ async function getResult(jwt, numeric) {
   return finalGoals(ev, fi);
 }
 
+// Every current-layout market under our authority. Decoded per-account so a
+// legacy-layout market or a Bet account can never abort the whole run.
+async function allMarkets() {
+  const raw = await retry(() =>
+    conn.getProgramAccounts(program.programId, {
+      commitment: "confirmed",
+      filters: [{ memcmp: { offset: 8, bytes: AUTH.toBase58() } }],
+    }),
+  );
+  const out = [];
+  for (const { pubkey, account } of raw) {
+    try { out.push({ publicKey: pubkey, account: program.coder.accounts.decode("market", account.data) }); }
+    catch { /* skip */ }
+  }
+  return out;
+}
+
 (async () => {
   if (!API) throw new Error("TXODDS_API_TOKEN not set");
-  const all = await retry(() =>
-    program.account.market.all([{ memcmp: { offset: 8, bytes: AUTH.toBase58() } }]),
-  );
+  const all = await allMarkets();
   const jwt = await freshJwt();
   let settled = 0, pending = 0, skipped = 0;
   for (const { publicKey, account } of all) {
@@ -102,12 +129,26 @@ async function getResult(jwt, numeric) {
     try { g = await getResult(jwt, numeric); }
     catch (e) { console.log("feed err", id, String(e.message).slice(0, 80)); continue; }
     if (!g) { pending++; continue; } // match not final yet
+    // Feed-bound market: the program requires FEED's ed25519 signature over
+    // "fixture:final:home:away" in the same transaction.
+    const pre = [];
+    if (!account.feedPubkey.equals(web3.PublicKey.default)) {
+      if (!FEED || !FEED.publicKey.equals(account.feedPubkey)) {
+        console.log("no feed key for", id); skipped++; continue;
+      }
+      pre.push(web3.Ed25519Program.createInstructionWithPrivateKey({
+        privateKey: FEED.secretKey,
+        message: Buffer.from(`${account.fixtureId}:final:${g.p1}:${g.p2}`),
+        instructionIndex: 0xffff,
+      }));
+    }
     try {
       await program.methods
         .postResult(g.p1, g.p2, sha(`${id}:${g.p1}:${g.p2}`))
+        .preInstructions(pre)
         .accountsPartial({ market: publicKey, oracle: AUTH })
         .rpc();
-      console.log(`settled ${id} ${g.p1}-${g.p2}`);
+      console.log(`settled ${id} ${g.p1}-${g.p2}${pre.length ? " [feed-verified]" : ""}`);
       settled++;
     } catch (e) { console.log("settle err", id, String(e.message).slice(0, 90)); }
   }

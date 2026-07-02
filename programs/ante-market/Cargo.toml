@@ -20,3 +20,4 @@ init-if-needed = ["anchor-lang/init-if-needed"]
 [dependencies]
 anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
 solana-sha256-hasher = "2.3.0"
+solana-sdk-ids = "2.2.1"

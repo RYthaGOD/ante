@@ -39,6 +39,19 @@ function loadProgram() {
   return { program, provider, authority: kp.publicKey };
 }
 
+// The feed signing keypair (repo root, gitignored) — signs each result so the
+// program can verify the score came from the feed, not just from the oracle.
+// FEED_SIGNER_SECRET (JSON array) overrides for hosted runs.
+const feedSignerUrl = new URL('../../../.feed-signer-keypair.json', import.meta.url);
+function loadFeedSigner(): anchor.web3.Keypair | null {
+  try {
+    const raw = process.env.FEED_SIGNER_SECRET ?? readFileSync(fileURLToPath(feedSignerUrl), 'utf8');
+    return web3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
+  } catch {
+    return null;
+  }
+}
+
 function marketPda(programId: any, authority: any, marketId: string) {
   return web3.PublicKey.findProgramAddressSync(
     [Buffer.from('market'), authority.toBuffer(), Buffer.from(marketId)],
@@ -48,14 +61,18 @@ function marketPda(programId: any, authority: any, marketId: string) {
 
 async function init() {
   const { program, authority } = loadProgram();
+  // Score markets bind to the feed signing key so settlement requires the
+  // feed's ed25519 signature; custom markets are feeder-asserted by design.
+  const feed = loadFeedSigner();
   for (const m of loadMarkets()) {
     const pda = marketPda(program.programId, authority, m.id);
+    const feedPubkey = m.kind !== 'custom' && feed ? feed.publicKey : web3.PublicKey.default;
     try {
       await program.methods
-        .initializeMarket(m.id, m.fixtureId ?? '', kindArg(m.kind), new BN(unixOf(m.resolutionDate)))
+        .initializeMarket(m.id, m.fixtureId ?? '', kindArg(m.kind), new BN(unixOf(m.resolutionDate)), 0, feedPubkey)
         .accountsPartial({ market: pda, authority, systemProgram: web3.SystemProgram.programId })
         .rpc();
-      console.log(`created  ${m.id}  (${m.title})`);
+      console.log(`created  ${m.id}  (${m.title})${feedPubkey.equals(web3.PublicKey.default) ? '' : '  [feed-verified]'}`);
     } catch (e: any) {
       console.log(`skip     ${m.id}  (${String(e.message ?? e).split('\n')[0]})`);
     }
@@ -90,11 +107,26 @@ async function settle() {
         const result = await txodds.getResult(m.fixtureId);
         if (!result) { console.log(`pending  ${m.id}  (no verified score yet)`); continue; }
         const res = settleScore(m, result);
+        // Feed-bound market: attach the ed25519 verification of the feed's
+        // signature over "fixture:final:home:away" (checked on-chain).
+        const pre: any[] = [];
+        if (!acct.feedPubkey.equals(web3.PublicKey.default)) {
+          const feed = loadFeedSigner();
+          if (!feed || !feed.publicKey.equals(acct.feedPubkey)) {
+            console.log(`pending  ${m.id}  (feed signer key required for verified settle)`); continue;
+          }
+          pre.push(web3.Ed25519Program.createInstructionWithPrivateKey({
+            privateKey: feed.secretKey,
+            message: Buffer.from(`${acct.fixtureId}:final:${result.homeGoals}:${result.awayGoals}`),
+            instructionIndex: 0xffff,
+          }));
+        }
         await program.methods
           .postResult(result.homeGoals, result.awayGoals, hexToBytes(res.resultDigest))
+          .preInstructions(pre)
           .accountsPartial({ market: pda, oracle: authority })
           .rpc();
-        console.log(`settled  ${m.id}  ${result.homeGoals}-${result.awayGoals} -> ${res.winningOutcome}  (digest ${res.resultDigest.slice(0, 12)}...)`);
+        console.log(`settled  ${m.id}  ${result.homeGoals}-${result.awayGoals} -> ${res.winningOutcome}  (digest ${res.resultDigest.slice(0, 12)}...${pre.length ? ', feed-verified' : ''})`);
       }
     } catch (e: any) {
       console.log(`error    ${m.id}  (${String(e.message ?? e).split('\n')[0]})`);
