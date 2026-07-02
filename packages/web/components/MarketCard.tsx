@@ -27,6 +27,18 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
   const no = account.poolNo.toNumber() / LAMPORTS_PER_SOL;
   const total = yes + no;
   const yesPct = total > 0 ? Math.round((100 * yes) / total) : 50;
+  // Parimutuel preview: after your stake joins the pool, winners split the
+  // whole pot pro-rata — payout = stake * (total + stake) / (side + stake).
+  const stake = parseFloat(amount) || 0;
+  const payoutIf = (side: "yes" | "no") => {
+    if (stake <= 0) return null;
+    const sidePool = side === "yes" ? yes : no;
+    return (stake * (total + stake)) / (sidePool + stake);
+  };
+  const previewFor = (side: "yes" | "no") => {
+    const p = payoutIf(side);
+    return p === null ? null : `◎${p.toFixed(2)} (×${(p / stake).toFixed(2)})`;
+  };
   const resolved = "resolved" in account.status;
   const winner: "YES" | "NO" | null = resolved ? ("yes" in account.winningOutcome ? "YES" : "NO") : null;
   const kind: MarketKind =
@@ -119,7 +131,13 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
 
         {resolved && winner ? (
           <>
-            <SettlementProof winner={winner} digest={account.resultDigest} marketPubkey={market.publicKey.toBase58()} />
+            <SettlementProof
+              winner={winner}
+              digest={account.resultDigest}
+              marketPubkey={market.publicKey.toBase58()}
+              marketId={account.marketId}
+              kind={kind}
+            />
             {wallet && claimable && (
               <button className="btn btn-claim" disabled={busy !== null} onClick={() => send("claim")}>
                 {busy === "claim" ? "Claiming…" : `Claim ${winner} winnings`}
@@ -146,6 +164,12 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
                     {busy === "no" ? "…" : "Bet NO"}
                   </button>
                 </div>
+                {stake > 0 && (
+                  <div className="payout-preview">
+                    <span className="yes">YES wins → {previewFor("yes")}</span>
+                    <span className="no">NO wins → {previewFor("no")}</span>
+                  </div>
+                )}
               </>
             ) : (
               <div className="hint">Connect a wallet to bet</div>

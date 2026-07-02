@@ -34,6 +34,11 @@ export function explorerAddress(addr: string): string {
   return EXPLORER_CLUSTER === "mainnet-beta" ? base : `${base}?cluster=${EXPLORER_CLUSTER}`;
 }
 
+export function explorerTx(sig: string): string {
+  const base = `https://explorer.solana.com/tx/${sig}`;
+  return EXPLORER_CLUSTER === "mainnet-beta" ? base : `${base}?cluster=${EXPLORER_CLUSTER}`;
+}
+
 export function getProgram(provider: AnchorProvider): Program<AnteMarket> {
   return new Program(idl as AnteMarket, provider);
 }

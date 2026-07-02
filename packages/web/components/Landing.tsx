@@ -294,6 +294,7 @@ export function Footer() {
         <div className="footer-links">
           <a href="/#how">How it works</a>
           <a href="/markets">Markets</a>
+          <a href="https://github.com/RYthaGOD/ante" target="_blank" rel="noreferrer">GitHub ↗</a>
           <a href={EXPLORER} target="_blank" rel="noreferrer">Program ↗</a>
           <a href="https://faucet.solana.com" target="_blank" rel="noreferrer">Devnet faucet ↗</a>
         </div>

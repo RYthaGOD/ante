@@ -390,6 +390,25 @@ section[id] { scroll-margin-top: 88px; }
   font-size: 12px; font-weight: 700; color: var(--accent); text-decoration: none;
 }
 .proof-link:hover { text-decoration: underline; }
+.proof-links { display: flex; gap: 14px; flex-wrap: wrap; }
+.proof-verify {
+  background: rgba(94, 231, 223, 0.08); color: var(--accent);
+  border: 1px solid rgba(94, 231, 223, 0.3); border-radius: 10px;
+  padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.proof-verify:hover:not(:disabled) { background: rgba(94, 231, 223, 0.15); }
+.proof-verify:disabled { opacity: 0.6; cursor: default; }
+.proof-result { font-size: 11.5px; line-height: 1.5; border-radius: 8px; padding: 8px 10px; }
+.proof-ok { color: var(--yes); background: rgba(40, 217, 137, 0.08); border: 1px solid rgba(40, 217, 137, 0.25); }
+.proof-bad { color: var(--no); background: rgba(255, 93, 119, 0.08); border: 1px solid rgba(255, 93, 119, 0.25); }
+
+/* ---------- Parimutuel payout preview ---------- */
+.payout-preview {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: 11.5px; font-weight: 700; color: var(--muted);
+}
+.payout-preview .yes { color: var(--yes); }
+.payout-preview .no { color: var(--no); }
 
 /* ---------- Wallet area ---------- */
 .wallet-area { display: flex; align-items: center; gap: 12px; }
