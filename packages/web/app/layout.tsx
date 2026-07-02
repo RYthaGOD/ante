@@ -13,7 +13,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "ANTE — World Cup Settlement Markets",
   description:
-    "Verifiable World Cup prediction markets, settled trustlessly on TxODDS-confirmed results.",
+    "World Cup prediction markets on Solana. Each market settles from TxODDS match results, with the outcome and a SHA-256 proof written on-chain.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

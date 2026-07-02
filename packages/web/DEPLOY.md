@@ -43,6 +43,28 @@ After changing variables, redeploy with `railway up`.
 Import the repo on vercel.com, set **Root Directory** = `packages/web`, add the
 two env vars, deploy. Or `npx vercel --prod` from `packages/web`.
 
+## Automated settlement (cron services)
+
+Two Railway cron services keep the markets live against the **real TxODDS feed**
+(no manual `feeder settle`, no mock):
+
+- **`settler/`** (`ante-settler`, every 15 min) — settles each catalogue market
+  whose match is final, reading the live TxODDS scores.
+- **`rotation/`** (`ante-rotate`, every 30 min) — settles its rotating pool from
+  the live feed and seeds replacements from real upcoming fixtures.
+
+Both auto-refresh the short-lived guest JWT each run, so only the long-lived API
+token is configured. Set these variables on each service (in the Railway
+dashboard — secrets must not be piped in):
+
+| Var | Value |
+|---|---|
+| `SETTLER_SECRET` / `ROTATE_SECRET` | the oracle/authority wallet secret-key JSON array (the `AFuSARP…` devnet keypair) |
+| `TXODDS_API_TOKEN` | the long-lived token from `.txodds-creds.json` |
+| `ANCHOR_PROVIDER_URL` | `https://api.devnet.solana.com` |
+
+Deploy each from its directory with `railway up --service <name>`.
+
 ## How a visitor tries it (devnet)
 
 1. Install **Phantom** (or any Solana wallet) and switch the network to **Devnet**.

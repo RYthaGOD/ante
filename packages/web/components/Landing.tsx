@@ -55,16 +55,15 @@ export function Hero() {
     <section className="hero">
       <div className="hero-grid">
         <div className="hero-copy">
-          <div className="eyebrow">Settlement-first prediction markets · Solana</div>
+          <div className="eyebrow">Prediction markets · Solana</div>
           <h1>
             Bet on the World Cup.
             <br />
-            <span className="grad">Settled on-chain, verifiably.</span>
+            <span className="grad">Settled on-chain, in the open.</span>
           </h1>
           <p className="lede">
-            ANTE resolves every market against TxODDS-confirmed results and writes the outcome — with a
-            SHA-256 proof — straight to Solana. Most apps say &ldquo;redeem for cash, trust us.&rdquo;
-            ANTE shows the receipt.
+            ANTE settles every market from TxODDS match results and writes the outcome — plus a
+            SHA-256 proof — to Solana. Most apps just tell you that you won. ANTE lets you check.
           </p>
           <div className="cta-row">
             <a className="btn-primary" href="/markets">Explore live markets →</a>
@@ -72,7 +71,7 @@ export function Hero() {
           </div>
           <div className="trust-row">
             <span><i className="dot dot-green" /> Live on Devnet</span>
-            <span><i className="dot dot-cyan" /> Powered by TxODDS</span>
+            <span><i className="dot dot-cyan" /> TxODDS results</span>
             <span><i className="dot dot-gold" /> Built on Solana</span>
           </div>
         </div>
@@ -80,20 +79,20 @@ export function Hero() {
         <div className="hero-visual">
           <div className="showcase-card">
             <div className="sc-art">
-              <img src="/art/spain.png" alt="La Roja market art" />
+              <img src="/art/spain.png" alt="Spain match market" />
               <span className="sc-kind">Match Result</span>
               <span className="sc-live">● SETTLED</span>
             </div>
             <div className="sc-body">
-              <h3>La Roja Lay Down a Marker</h3>
+              <h3>La Roja Roll the Desert Hawks</h3>
               <div className="sc-odds"><span className="sc-yes" /></div>
               <div className="sc-proof">
                 <div className="sc-proof-head">
                   <span>✓ Settled on-chain</span>
                   <span className="pill pill-yes">YES won</span>
                 </div>
-                <code>sha256 · 84a3e320d788…603fdd</code>
-                <span className="sc-proof-note">Verified against the TxODDS-confirmed result</span>
+                <code>sha256 · a51a13321266…8f8642</code>
+                <span className="sc-proof-note">Checked against the TxODDS result</span>
               </div>
             </div>
           </div>
@@ -128,13 +127,13 @@ export function Stats({ count, open, settled, pooled }: { count: number; open: n
 /* ---------- how it works ---------- */
 export function HowItWorks() {
   const steps = [
-    { icon: I.list, t: "Pick a market", d: "Binary YES/NO questions on World Cup results, goals and player props." },
-    { icon: I.coin, t: "Stake your side", d: "Your SOL joins a parimutuel pool held by a program-owned vault — never a company wallet." },
-    { icon: I.shield, t: "Verified settlement", d: "When the match ends, the TxODDS result is posted; the program recomputes a SHA-256 digest and settles only if it matches." },
-    { icon: I.trophy, t: "Claim, trustlessly", d: "Winners claim their pro-rata share directly from the on-chain pool. No middleman, no waiting." },
+    { icon: I.list, t: "Pick a market", d: "Yes/no questions on World Cup match results, total goals, and player props." },
+    { icon: I.coin, t: "Stake your side", d: "Your SOL goes into a shared pool the program controls — not a company wallet." },
+    { icon: I.shield, t: "Settle from the result", d: "When the match ends, the TxODDS result is posted on-chain. The program recomputes the SHA-256 digest and settles only if it matches." },
+    { icon: I.trophy, t: "Claim your share", d: "Winners take their share of the pool directly on-chain. No middleman, no waiting." },
   ];
   const flow = [
-    { icon: I.feed, t: "TxODDS feed", s: "verified results" },
+    { icon: I.feed, t: "TxODDS feed", s: "match results" },
     { icon: I.bolt, t: "Oracle / feeder", s: "posts on-chain" },
     { icon: I.globe, t: "Solana program", s: "checks + settles" },
     { icon: I.trophy, t: "You", s: "claim winnings" },
@@ -143,8 +142,8 @@ export function HowItWorks() {
     <section className="section" id="how">
       <div className="section-head">
         <div className="eyebrow">How it works</div>
-        <h2>Four steps. Zero &ldquo;trust us.&rdquo;</h2>
-        <p>Every step a bettor takes is a real Solana transaction — public and auditable from the first lamport.</p>
+        <h2>Four steps, start to finish.</h2>
+        <p>Every step is a real Solana transaction that anyone can look up.</p>
       </div>
       <div className="steps">
         {steps.map((s, i) => (
@@ -179,19 +178,19 @@ export function HowItWorks() {
 /* ---------- settlement spotlight ---------- */
 export function Settlement() {
   const guards = [
-    { icon: I.feed, t: "Authorized feeder", d: "Only the market's designated oracle can post a result." },
-    { icon: I.lock, t: "After the match only", d: "Settlement is gated to the market's settle window." },
+    { icon: I.feed, t: "One feeder", d: "Only the market's assigned oracle can post a result." },
+    { icon: I.lock, t: "Time-locked", d: "A market can't settle before its scheduled time." },
     { icon: I.shield, t: "Hash-checked", d: "The program recomputes the SHA-256 digest and rejects any mismatch." },
-    { icon: I.trophy, t: "One-time + public", d: "A market settles once; the proof lives on-chain forever." },
+    { icon: I.trophy, t: "Once, and public", d: "A market settles one time, and the proof stays on-chain." },
   ];
   return (
     <section className="section settle" id="settlement">
       <div className="section-head">
-        <div className="eyebrow">The differentiator</div>
-        <h2>Settlement you can verify</h2>
+        <div className="eyebrow">Settlement</div>
+        <h2>Settlement you can check</h2>
         <p>
-          Other apps hide resolution on a private server. ANTE commits the winning outcome and a
-          cryptographic proof of it on-chain — so anyone can recompute settlement from the public result.
+          Most apps decide the result on a private server. ANTE writes the winning outcome and a
+          SHA-256 proof on-chain, so anyone can recompute it from the public match result.
         </p>
       </div>
       <div className="settle-grid">
@@ -202,7 +201,7 @@ export function Settlement() {
           </div>
           <div className="compare-row good">
             <span className="compare-tag">ANTE</span>
-            <span>Winner + SHA-256 digest on-chain, with a one-click Solana Explorer link.</span>
+            <span>Winner and SHA-256 proof on-chain, with a link to Solana Explorer.</span>
           </div>
           <a className="btn-ghost" href={EXPLORER} target="_blank" rel="noreferrer">View the program on Solana Explorer →</a>
         </div>
@@ -231,8 +230,8 @@ export function MarketsCTA({ open, pooled }: { open: number; pooled: number }) {
           <div className="eyebrow">Live on devnet</div>
           <h2>{open} markets open right now</h2>
           <p>
-            ◎ {pooled.toFixed(2)} already pooled on-chain. Connect a wallet on Devnet, grab free test SOL,
-            and place a real bet — settlement and payout happen trustlessly on Solana.
+            ◎ {pooled.toFixed(2)} pooled on-chain so far. Connect a Devnet wallet, get free test SOL,
+            and place a real bet. Settlement and payout run on Solana.
           </p>
         </div>
         <a className="btn-primary markets-cta-btn" href="/markets">Browse all markets →</a>
@@ -244,18 +243,18 @@ export function MarketsCTA({ open, pooled }: { open: number; pooled: number }) {
 /* ---------- protocol + roadmap ---------- */
 export function Protocol() {
   const facts = [
-    { icon: I.globe, t: "Built on Solana", d: "Fast, low-fee, composable settlement and payouts." },
-    { icon: I.coin, t: "Parimutuel pools", d: "Stakes pool in a program-owned PDA and pay winners pro-rata." },
-    { icon: I.shield, t: "On-chain proofs", d: "Every settlement commits a SHA-256 digest of the verified result." },
-    { icon: I.feed, t: "TxODDS feed", d: "Verified ground-truth results behind a single, swappable adapter." },
+    { icon: I.globe, t: "Solana", d: "Fast, low-fee transactions for bets, settlement, and payouts." },
+    { icon: I.coin, t: "Parimutuel pools", d: "Bets pool in a program-owned account and pay winners pro-rata." },
+    { icon: I.shield, t: "On-chain proofs", d: "Every settlement writes a SHA-256 digest of the match result." },
+    { icon: I.feed, t: "TxODDS feed", d: "Live World Cup results, read through one adapter." },
   ];
-  const roadmap = ["M-of-N feeder set", "On-chain dispute window", "Mainnet launch", "More competitions & sports"];
+  const roadmap = ["Multiple feeders", "On-chain dispute window", "Mainnet launch", "More competitions & sports"];
   return (
     <section className="section protocol" id="protocol">
       <div className="section-head">
         <div className="eyebrow">The protocol</div>
-        <h2>A settlement layer, not just a betting app</h2>
-        <p>The whole stack depends only on the TxODDS adapter interface — mock today, live feed with one swap.</p>
+        <h2>Under the hood</h2>
+        <p>Markets settle from the live TxODDS World Cup feed, read through one adapter the rest of the code depends on.</p>
       </div>
       <div className="facts">
         {facts.map((f) => (
@@ -290,7 +289,7 @@ export function Footer() {
       <div className="footer-top">
         <div>
           <span className="logo">ANTE</span>
-          <p>Verifiable settlement for prediction markets.</p>
+          <p>Prediction markets that settle on-chain.</p>
         </div>
         <div className="footer-links">
           <a href="/#how">How it works</a>

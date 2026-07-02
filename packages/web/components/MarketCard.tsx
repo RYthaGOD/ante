@@ -102,18 +102,20 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
         <h3>{meta?.title ?? account.marketId}</h3>
         <p className="blurb">{meta?.blurb ?? ""}</p>
 
-        <div className="odds">
-          <div className="odds-bar">
-            <div className="odds-yes" style={{ width: `${yesPct}%` }} />
+        {(!resolved || total > 0) && (
+          <div className="odds">
+            <div className="odds-bar">
+              <div className="odds-yes" style={{ width: `${yesPct}%` }} />
+            </div>
+            <div className="odds-row">
+              <span className="yes">YES {yesPct}%</span>
+              <span className="no">NO {100 - yesPct}%</span>
+            </div>
+            <div className="pool">
+              {resolved ? "Final pool" : "Pool"} {total.toFixed(2)} SOL · {yes.toFixed(2)} / {no.toFixed(2)}
+            </div>
           </div>
-          <div className="odds-row">
-            <span className="yes">YES {yesPct}%</span>
-            <span className="no">NO {100 - yesPct}%</span>
-          </div>
-          <div className="pool">
-            Pool {total.toFixed(2)} SOL · {yes.toFixed(2)} / {no.toFixed(2)}
-          </div>
-        </div>
+        )}
 
         {resolved && winner ? (
           <>
@@ -126,7 +128,7 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
           </>
         ) : (
           <div className="bet">
-            <div className="resolve-at">Resolves {resolveDate.toLocaleDateString()}</div>
+            <div className="resolve-at">Betting closes {resolveDate.toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</div>
             {wallet ? (
               <>
                 <input

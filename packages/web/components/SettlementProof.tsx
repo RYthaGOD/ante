@@ -30,7 +30,7 @@ export function SettlementProof({
         </code>
       </div>
       <div className="proof-note">
-        SHA-256 commitment verified on-chain against the TxODDS-confirmed result.
+        Recomputed and checked on-chain against the TxODDS match result.
       </div>
       {href && (
         <a className="proof-link" href={href} target="_blank" rel="noopener noreferrer">
