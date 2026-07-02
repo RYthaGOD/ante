@@ -55,6 +55,24 @@ function loadMap(): FixtureMap {
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
+// Read a response body, keeping whatever arrived if the server resets the
+// connection at end-of-stream (TxODDS does this on large score histories —
+// the events already received are still valid SSE lines).
+async function readBodyTolerant(res: Response): Promise<string> {
+  if (!res.body) return res.text();
+  const reader = res.body.getReader();
+  let out = '';
+  const decoder = new TextDecoder();
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      out += decoder.decode(value, { stream: true });
+    }
+  } catch { /* keep the partial body */ }
+  return out;
+}
+
 // Parse a Server-Sent Events body into its `data:` JSON payloads.
 function parseSse(text: string): Array<Record<string, any>> {
   const out: Array<Record<string, any>> = [];
@@ -118,7 +136,7 @@ export class HttpTxOddsAdapter implements TxOddsAdapter {
     });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`scores/historical/${entry.fixtureId} ${res.status}: ${await res.text()}`);
-    const events = parseSse(await res.text());
+    const events = parseSse(await readBodyTolerant(res));
     if (events.length === 0) return null;
 
     // Find the match-over marker; absent it, the match isn't final yet.

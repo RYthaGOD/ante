@@ -18,15 +18,6 @@
     "art": "conmebol"
   },
   {
-    "id": "wc26-eng-cro:over_2_5",
-    "title": "Three Lions Goal Storm",
-    "blurb": "Over 2.5 goals in England vs Croatia.",
-    "kind": "over_2_5",
-    "fixtureId": "wc26-eng-cro",
-    "resolutionDate": "2026-06-17T23:00:00Z",
-    "art": "goals"
-  },
-  {
     "id": "wc26-mex-kor:over_2_5",
     "title": "El Tri Shootout",
     "blurb": "Over 2.5 goals in Mexico vs South Korea.",
@@ -52,24 +43,6 @@
     "fixtureId": "wc26-sco-bra",
     "resolutionDate": "2026-06-25T01:00:00Z",
     "art": "debutant"
-  },
-  {
-    "id": "wc26-arg-alg:home_win",
-    "title": "La Albiceleste March On",
-    "blurb": "Argentina beat Algeria.",
-    "kind": "home_win",
-    "fixtureId": "wc26-arg-alg",
-    "resolutionDate": "2026-06-17T04:00:00Z",
-    "art": "golazo-king"
-  },
-  {
-    "id": "wc26-sau-uru:home_win",
-    "title": "Green Falcons Stun La Celeste",
-    "blurb": "Saudi Arabia beat Uruguay.",
-    "kind": "home_win",
-    "fixtureId": "wc26-sau-uru",
-    "resolutionDate": "2026-06-16T01:00:00Z",
-    "art": "saudi"
   },
   {
     "id": "wc26-tur-usa:over_2_5",

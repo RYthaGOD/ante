@@ -83,12 +83,24 @@ async function freshJwt() {
   const t = await r.text();
   try { return JSON.parse(t).token; } catch { return t.trim(); }
 }
+// Keep whatever arrived if the server resets at end-of-stream (TxODDS does
+// this on large histories); the SSE lines already received are still valid.
+async function readBodyTolerant(r) {
+  if (!r.body) return r.text();
+  const reader = r.body.getReader();
+  const dec = new TextDecoder();
+  let out = "";
+  try {
+    for (;;) { const { done, value } = await reader.read(); if (done) break; out += dec.decode(value, { stream: true }); }
+  } catch { /* partial body is fine */ }
+  return out;
+}
 async function getResult(jwt, numeric) {
   const r = await fetch(`${BASE}/api/scores/historical/${numeric}`, {
     headers: { Authorization: `Bearer ${jwt}`, "X-Api-Token": API },
   });
   if (!r.ok) return null;
-  const ev = parseSse(await r.text());
+  const ev = parseSse(await readBodyTolerant(r));
   if (!ev.length) return null;
   let fi = -1;
   for (let i = ev.length - 1; i >= 0; i--) if (ev[i].Action === FINAL) { fi = i; break; }
