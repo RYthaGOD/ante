@@ -82,15 +82,18 @@ const check = (name: string, ok: boolean, detail = "") => {
   m = await mainProgram.account.market.fetch(mkt);
   check("post_custom_result -> resolved YES", "resolved" in m.status && "yes" in m.winningOutcome);
 
-  // 5. user claims pro-rata (0.05 stake of a 0.10 pool -> ~0.10 payout)
+  // 5. user claims pro-rata (0.05 stake of a 0.10 pool -> ~0.10 payout).
+  // The Bet account closes with the claim (rent back to the bettor), so the
+  // post-claim state is: balance up, bet account gone.
   const before = await connection.getBalance(user.publicKey);
   await userProgram.methods.claim()
     .accountsPartial({ market: mkt, bet: betPda(mkt, user.publicKey, 1), bettor: user.publicKey }).rpc();
   const after = await connection.getBalance(user.publicKey);
-  const bet: any = await mainProgram.account.bet.fetch(betPda(mkt, user.publicKey, 1));
-  check("claim pays out winner", after > before && bet.claimed === true, `+${((after - before) / SOL).toFixed(4)} SOL, claimed=${bet.claimed}`);
+  const bet: any = await mainProgram.account.bet.fetchNullable(betPda(mkt, user.publicKey, 1));
+  check("claim pays out winner + closes bet (rent back)", after > before && bet === null,
+    `+${((after - before) / SOL).toFixed(4)} SOL, bet account closed=${bet === null}`);
 
-  // 6. guard: double-claim must fail
+  // 6. guard: double-claim must fail (the bet account no longer exists)
   let doubleBlocked = false;
   try {
     await userProgram.methods.claim().accountsPartial({ market: mkt, bet: betPda(mkt, user.publicKey, 1), bettor: user.publicKey }).rpc();

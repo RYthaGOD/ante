@@ -8,38 +8,57 @@ TxODDS **World Cup Hackathon — Prediction Markets & Settlement** track.
 > Inspired by Upshot's card-style markets, but where Upshot says *"redeem for
 > cash — trust us"*, ANTE shows the on-chain settlement proof.
 
-**Live MVP (Solana devnet):** https://ante-web-production-5d56.up.railway.app —
-connect a wallet set to Devnet, place a YES/NO bet, and claim on a settled market.
+**Live (Solana devnet):** https://ante-bet.xyz — connect a wallet set to Devnet,
+place a YES/NO bet, and claim on a settled market. Markets settle from the
+**live TxODDS (TxLINE) feed** on a cron; every settled card shows its on-chain
+proof, recomputable in the browser with one click.
 Deployment + "how to try it" guide: [`packages/web/DEPLOY.md`](packages/web/DEPLOY.md).
 
 ## How it works
 
 ```
-TxODDS feed ──► Oracle/Feeder (packages/oracle) ──► ante-market program (Solana)
- (verified)      reads results, posts (outcome,        create / bet / settle / claim
-                  sha256 digest) on-chain               + MarketResolved event
-                                                              │
-                                          Next.js card UI (packages/web) reads it
+TxLINE feed ──► settler cron ──► ante-market program (Solana)
+ (live scores)   posts score + sha256     verifies the feed's ed25519 signature
+                 + feed ed25519 sig       over the exact score, recomputes the
+                        │                 digest, computes the winner, settles
+                        │                        │  MarketResolved event
+                 rotation cron seeds             │
+                 upcoming fixtures        Next.js card UI reads it (websocket live)
 ```
 
 - **Markets** are binary YES/NO, identified by a `market_id`.
-  - *Score markets* (`home_win`, `over_2_5`): the feeder posts the verified score
-    and the **program computes the winner** and checks `sha256(market_id:home:away)`.
+  - *Score markets* (`home_win`, `over_2_5`): the feeder posts the verified score;
+    the **program computes the winner**, checks `sha256(market_id:home:away)`,
+    and — for feed-bound markets — **verifies the feed's ed25519 signature over
+    `fixture:final:home:away` via instruction introspection**. The oracle alone
+    cannot settle a score the feed never produced.
   - *Custom markets* (Golden Boot, player props, progression…): the feeder posts
     the YES/NO outcome directly, bound by `sha256(market_id:YES|NO)`. Same
     trustless guards (authorized feeder, settle window, on-chain digest).
-- **Bettors** stake SOL into a parimutuel pool; winners claim pro-rata.
+- **Bettors** stake SOL into a parimutuel pool; winners claim pro-rata (the Bet
+  account closes on claim, so rent comes back too).
+- Abandoned fixture? After a grace window the market can be **voided** and every
+  stake is reclaimable in full — funds can never strand.
 - The TS settlement logic (`packages/oracle`) is the exact twin of the on-chain
   rule, so the feeder and chain agree by construction.
+
+## Verify a settlement yourself
+
+Open any settled card on [ante-bet.xyz](https://ante-bet.xyz) and hit
+**"Recompute proof in browser"**: it brute-forces the scoreline out of the
+on-chain digest (`sha256("wc26-bra-jpn:home_win:2:1")`), shows the preimage, and
+links the settle transaction on Solana Explorer — where the ed25519 feed
+signature is visible in the same transaction.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `programs/ante-market` | Anchor program — `initialize_market` / `place_bet` / `post_result` / `post_custom_result` / `claim` |
-| `tests/ante-market.ts` | Integration tests (score + custom settlement, guard rejections) |
-| `packages/oracle` | TxODDS adapter (mock), market registry, settlement logic, **feeder** service + off-chain demo |
-| `packages/web` | Next.js card UI: live markets, place bet, claim, settlement-proof view |
+| `programs/ante-market` | Anchor program — `initialize_market` / `place_bet` / `post_result` (ed25519 feed verify) / `post_custom_result` / `claim` / `void_market` / `close_market` / `set_oracle` / `set_feed` / `set_settle_after` |
+| `tests/ante-market.ts` | 10 integration tests: score + custom settlement, feed-signature guards (missing/wrong signer/wrong score), void + refunds, fee math, oracle rotation, deadline sweep |
+| `packages/oracle` | **Live TxLINE adapter** (+ mock fallback behind the same `TxOddsAdapter` interface), market registry, settlement logic, feeder + one-time TxODDS onboarding CLI |
+| `packages/web` | Next.js card UI: live markets (websocket), payout preview, place bet, claim, in-browser proof recompute |
+| `settler/` `rotation/` | Railway crons: settle finished matches from the live feed (feed-signed), keep the board seeded with upcoming fixtures |
 
 ## Prerequisites (WSL Ubuntu)
 
@@ -78,9 +97,23 @@ anchor deploy --provider.cluster localnet
 npx ts-mocha -p ./tsconfig.json -t 1000000 'tests/**/*.ts'
 ```
 
-## Production note
+## Live data & trust model
 
-The mock TxODDS adapter (`packages/oracle/src/txodds/mock.ts`) is the only thing
-between this and live data — everything depends on the `TxOddsAdapter` interface,
-so swapping in the real TxODDS feed is a one-file change. Settlement hardening
-(M-of-N feeders, dispute window) follows the ANTE mechanism design.
+The devnet deployment runs on the **real TxODDS (TxLINE) feed** — REST fixtures
+snapshot + SSE score streams, gated by the on-chain `subscribe` transaction and
+an ed25519-activated API token (see [`packages/oracle/TXODDS.md`](packages/oracle/TXODDS.md)).
+The mock adapter remains only as a local-dev fallback behind the same
+`TxOddsAdapter` interface.
+
+Three keys, three privileges:
+
+| Key | Where | Can do |
+|---|---|---|
+| treasury | offline | program upgrades, funding |
+| ops (authority/oracle) | Railway crons | create/settle/void/close markets |
+| feed signer | Railway settler | sign results — the program **rejects any score it didn't sign** |
+
+Today the feed key is ours, attesting at ingestion what TxLINE served; when
+TxODDS publishes their own signing key, `set_feed` points every market at it
+with **no redeploy** — the on-chain verification is already in place. Next on
+the roadmap: M-of-N feeders and a dispute window, per the ANTE mechanism design.

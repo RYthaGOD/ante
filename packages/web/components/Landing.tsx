@@ -129,7 +129,7 @@ export function HowItWorks() {
   const steps = [
     { icon: I.list, t: "Pick a market", d: "Yes/no questions on World Cup match results, total goals, and player props." },
     { icon: I.coin, t: "Stake your side", d: "Your SOL goes into a shared pool the program controls — not a company wallet." },
-    { icon: I.shield, t: "Settle from the result", d: "When the match ends, the TxODDS result is posted on-chain. The program recomputes the SHA-256 digest and settles only if it matches." },
+    { icon: I.shield, t: "Settle from the result", d: "When the match ends, the TxODDS result is posted on-chain with the feed's ed25519 signature. The program verifies the signature, recomputes the SHA-256 digest, and settles only if both check out." },
     { icon: I.trophy, t: "Claim your share", d: "Winners take their share of the pool directly on-chain. No middleman, no waiting." },
   ];
   const flow = [
@@ -178,8 +178,8 @@ export function HowItWorks() {
 /* ---------- settlement spotlight ---------- */
 export function Settlement() {
   const guards = [
-    { icon: I.feed, t: "One feeder", d: "Only the market's assigned oracle can post a result." },
-    { icon: I.lock, t: "Time-locked", d: "A market can't settle before its scheduled time." },
+    { icon: I.feed, t: "Feed-signed", d: "The score carries the feed's ed25519 signature, verified on-chain — even the oracle can't post a result the feed never produced." },
+    { icon: I.lock, t: "Time-locked", d: "Betting closes at kickoff and a market can't settle before its scheduled time." },
     { icon: I.shield, t: "Hash-checked", d: "The program recomputes the SHA-256 digest and rejects any mismatch." },
     { icon: I.trophy, t: "Once, and public", d: "A market settles one time, and the proof stays on-chain." },
   ];

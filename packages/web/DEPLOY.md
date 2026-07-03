@@ -10,7 +10,7 @@ to try it.
 | Var | Value | Why |
 |---|---|---|
 | `NEXT_PUBLIC_RPC` | `https://api.devnet.solana.com` | which cluster to read |
-| `NEXT_PUBLIC_MARKET_AUTHORITY` | `AFuSARP1KVUPL9AW22kq86QcgFiBgaDtrFyvPWSAk6wc` | lets the client derive market PDAs (one batched fetch, avoids rate-limited getProgramAccounts) |
+| `NEXT_PUBLIC_MARKET_AUTHORITY` | `9XDgRxtYkPCaTV2a69VYCNWoCVjuQw1y8897rWZZJWLB` | the ops keypair that creates markets — the client filters/derives market accounts by this authority |
 
 **Do NOT set `NEXT_PUBLIC_DEMO_WALLET` in production.** With it unset, the
 built-in throwaway demo wallet is disabled and visitors connect their **own**
@@ -22,22 +22,15 @@ wallet (Phantom/Solflare/Backpack, set to **Devnet**). The local `.env.local`
 
 ## Railway (chosen host)
 
-Prepped for Railway already: `railway.json` (Nixpacks + `$PORT` start command),
-a `$PORT`-aware `start` script, and Node pinned to 20. Railway builds in the
-cloud (Nixpacks runs `npm ci` + `next build`), so deploy from `packages/web`.
+**Push-to-deploy is live:** the service builds from GitHub `main` on every push,
+using the repo-root `railway.json` (pins NIXPACKS — Railway's newer Railpack
+default would otherwise detect the root `Cargo.toml` and try to build the Anchor
+program — and builds/starts `packages/web`). A healthcheck on `/` gates the
+traffic swap, so a bad build can never replace the running site.
 
-From `packages/web`:
-```
-railway login                 # interactive (browser) — only you can do this
-railway init                  # create a new project (name it e.g. ante)
-railway up                    # upload + build + deploy this dir
-railway variables \
-  --set "NEXT_PUBLIC_RPC=https://api.devnet.solana.com" \
-  --set "NEXT_PUBLIC_MARKET_AUTHORITY=AFuSARP1KVUPL9AW22kq86QcgFiBgaDtrFyvPWSAk6wc"
-railway domain                # generate the public https URL
-```
+Manual alternative from `packages/web`: `railway up`. After changing
+`NEXT_PUBLIC_*` variables, redeploy (they're baked at build time).
 Do **not** set `NEXT_PUBLIC_DEMO_WALLET` → visitors use their own wallet.
-After changing variables, redeploy with `railway up`.
 
 ### Vercel (alternative)
 Import the repo on vercel.com, set **Root Directory** = `packages/web`, add the
@@ -54,16 +47,12 @@ Two Railway cron services keep the markets live against the **real TxODDS feed**
   the live feed and seeds replacements from real upcoming fixtures.
 
 Both auto-refresh the short-lived guest JWT each run, so only the long-lived API
-token is configured. Set these variables on each service (in the Railway
-dashboard — secrets must not be piped in):
+token is configured. The settler also holds the **feed signing key**: every
+score it posts carries an ed25519 signature the program verifies on-chain, so
+the oracle key alone can't invent a result. Credentials + the full key model:
+[`CRON_SETUP.md`](../../CRON_SETUP.md) at the repo root.
 
-| Var | Value |
-|---|---|
-| `SETTLER_SECRET` / `ROTATE_SECRET` | the oracle/authority wallet secret-key JSON array (the `AFuSARP…` devnet keypair) |
-| `TXODDS_API_TOKEN` | the long-lived token from `.txodds-creds.json` |
-| `ANCHOR_PROVIDER_URL` | `https://api.devnet.solana.com` |
-
-Deploy each from its directory with `railway up --service <name>`.
+Deploy each from its directory with `railway up`.
 
 ## How a visitor tries it (devnet)
 
