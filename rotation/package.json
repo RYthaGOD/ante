@@ -6,13 +6,16 @@
     "start": "node rotate.mjs"
   },
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.32.1",
     "@solana/web3.js": "1.98.4"
   },
   "overrides": {
-    "rpc-websockets": "9.3.9"
+    "rpc-websockets": {
+      ".": "9.3.9",
+      "uuid": "9.0.1"
+    }
   }
 }
