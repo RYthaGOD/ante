@@ -75,6 +75,15 @@ async function freshJwt() {
   try { return JSON.parse(t).token; } catch { return t.trim(); }
 }
 
+// The feed occasionally resets the connection; retry the whole request.
+async function fetchJson(url, headers) {
+  return retry(async () => {
+    const r = await fetch(url, { headers });
+    if (!r.ok) throw new Error(`snapshot ${r.status}`);
+    return r.json();
+  });
+}
+
 async function seed(c) {
   await program.methods
     .initializeMarket(c.marketId, String(c.fixtureId), kindArg(c.kind), new BN(c.settleAfter), 0, FEED_PK)
@@ -103,10 +112,10 @@ async function seed(c) {
   let open = all.filter((m) => "open" in m.account.status && m.account.settleAfter.toNumber() > nowSec()).length;
 
   // 2. upcoming fixtures from the live feed
-  const jwt = await freshJwt();
+  const jwt = await retry(freshJwt);
   const url = new URL(`${BASE}/api/fixtures/snapshot`);
   url.searchParams.set("competitionId", COMP);
-  const rows = await (await fetch(url, { headers: { Authorization: `Bearer ${jwt}`, "X-Api-Token": API } })).json();
+  const rows = await fetchJson(url, { Authorization: `Bearer ${jwt}`, "X-Api-Token": API });
   const now = nowSec();
   const candidates = [];
   for (const r of (rows || [])) {
