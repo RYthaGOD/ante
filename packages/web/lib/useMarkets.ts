@@ -23,11 +23,15 @@ async function retry<T>(fn: () => Promise<T>, tries = 5): Promise<T> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Row = { publicKey: PublicKey; account: any };
 
-// Open (still taking bets) first, then settled; within each, soonest cutoff first.
+// Open (still taking bets) first with the soonest cutoff on top; settled after,
+// freshest result first — the newest proofs lead the settled section.
 const byOpenThenCutoff = (a: Row, b: Row) => {
   const ao = "open" in a.account.status ? 0 : 1;
   const bo = "open" in b.account.status ? 0 : 1;
-  return ao - bo || a.account.settleAfter.toNumber() - b.account.settleAfter.toNumber();
+  if (ao !== bo) return ao - bo;
+  const at = a.account.settleAfter.toNumber();
+  const bt = b.account.settleAfter.toNumber();
+  return ao === 0 ? at - bt : bt - at;
 };
 
 const authorityFilter = () =>

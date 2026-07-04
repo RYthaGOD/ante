@@ -16,9 +16,14 @@ export function Nav() {
       return;
     }
     let live = true;
-    connection.getBalance(publicKey).then((b) => live && setBal(b / LAMPORTS_PER_SOL)).catch(() => {});
+    const refresh = () =>
+      connection.getBalance(publicKey).then((b) => live && setBal(b / LAMPORTS_PER_SOL)).catch(() => {});
+    refresh();
+    // Keep the header balance fresh after bets/claims without cross-component wiring.
+    const t = setInterval(refresh, 15_000);
     return () => {
       live = false;
+      clearInterval(t);
     };
   }, [publicKey, connection]);
 

@@ -410,6 +410,31 @@ section[id] { scroll-margin-top: 88px; }
 .payout-preview .yes { color: var(--yes); }
 .payout-preview .no { color: var(--no); }
 
+/* ---------- Bet form extras ---------- */
+.closes-in { color: var(--accent); font-weight: 700; }
+.stake-row { display: flex; gap: 8px; align-items: stretch; }
+.stake-row .amount { flex: 1; min-width: 0; }
+.chips { display: flex; gap: 6px; }
+.chip {
+  background: rgba(255, 255, 255, 0.04); color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 9px;
+  padding: 0 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.chip:hover { color: var(--text); border-color: rgba(94, 231, 223, 0.35); }
+.chip-on { color: var(--accent); border-color: rgba(94, 231, 223, 0.45); background: rgba(94, 231, 223, 0.08); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.flash { color: var(--yes); font-size: 12.5px; font-weight: 700; }
+
+/* ---------- In-play (awaiting result) state ---------- */
+.proof-live { border-color: rgba(94, 231, 223, 0.25); }
+.proof-label-live { color: var(--accent); }
+.pill-live {
+  background: rgba(94, 231, 223, 0.14); color: var(--accent);
+  border: 1px solid rgba(94, 231, 223, 0.3);
+  animation: livepulse 2.2s ease-in-out infinite;
+}
+@keyframes livepulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
 /* ---------- Wallet area ---------- */
 .wallet-area { display: flex; align-items: center; gap: 12px; }
 .devnet-hint {

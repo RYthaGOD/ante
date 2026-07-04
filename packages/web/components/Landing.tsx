@@ -109,7 +109,7 @@ export function Stats({ count, open, settled, pooled }: { count: number; open: n
   const items = [
     { n: count, l: "Markets" },
     { n: open, l: "Open now" },
-    { n: `◎ ${pooled.toFixed(2)}`, l: "Total pooled" },
+    { n: `◎ ${pooled.toFixed(2)}`, l: "Total staked" },
     { n: settled, l: "On-chain proofs" },
   ];
   return (
@@ -230,7 +230,7 @@ export function MarketsCTA({ open, pooled }: { open: number; pooled: number }) {
           <div className="eyebrow">Live on devnet</div>
           <h2>{open} markets open right now</h2>
           <p>
-            ◎ {pooled.toFixed(2)} pooled on-chain so far. Connect a Devnet wallet, get free test SOL,
+            ◎ {pooled.toFixed(2)} staked on-chain so far. Connect a Devnet wallet, get free test SOL,
             and place a real bet. Settlement and payout run on Solana.
           </p>
         </div>
