@@ -240,6 +240,33 @@ export function MarketsCTA({ open, pooled }: { open: number; pooled: number }) {
   );
 }
 
+/* ---------- golazo CTA band ---------- */
+export function GolazoCTA() {
+  return (
+    <section className="section">
+      <div className="markets-cta golazo-cta">
+        <div className="markets-cta-copy">
+          <div className="eyebrow">From the same builders</div>
+          <h2>The World Cup ends. Golazo doesn&rsquo;t.</h2>
+          <p>
+            A World Cup trading-card game on Solana — open packs, collect players rated from
+            real stats, build your 5, and battle (or stake SOL on it). Golazo even uses ANTE&rsquo;s
+            on-chain settlement to recompute match stats.
+          </p>
+        </div>
+        <a
+          className="btn-primary markets-cta-btn"
+          href="https://golazo-web-production.up.railway.app/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Try Golazo →
+        </a>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- protocol + roadmap ---------- */
 export function Protocol() {
   const facts = [
@@ -294,6 +321,7 @@ export function Footer() {
         <div className="footer-links">
           <a href="/#how">How it works</a>
           <a href="/markets">Markets</a>
+          <a href="https://golazo-web-production.up.railway.app/" target="_blank" rel="noreferrer">Golazo ↗</a>
           <a href="https://github.com/RYthaGOD/ante" target="_blank" rel="noreferrer">GitHub ↗</a>
           <a href={EXPLORER} target="_blank" rel="noreferrer">Program ↗</a>
           <a href="https://faucet.solana.com" target="_blank" rel="noreferrer">Devnet faucet ↗</a>

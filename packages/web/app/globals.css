@@ -486,6 +486,7 @@ section[id] { scroll-margin-top: 88px; }
 .markets-cta-copy h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.8px; margin: 12px 0 10px; }
 .markets-cta-copy p { color: var(--muted); font-size: 16px; line-height: 1.6; margin: 0; max-width: 640px; }
 .markets-cta-btn { font-size: 16px; padding: 15px 26px; white-space: nowrap; }
+.golazo-cta { background: linear-gradient(120deg, rgba(120, 210, 90, 0.10), rgba(255, 210, 74, 0.06)); }
 
 /* ===== /markets page ===== */
 .markets-page { padding-top: 52px; }

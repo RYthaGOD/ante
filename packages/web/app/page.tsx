@@ -2,7 +2,7 @@
 
 import { useMarkets } from "../lib/useMarkets";
 import { Nav } from "../components/Nav";
-import { Hero, Stats, HowItWorks, Settlement, MarketsCTA, Protocol, Footer } from "../components/Landing";
+import { Hero, Stats, HowItWorks, Settlement, MarketsCTA, GolazoCTA, Protocol, Footer } from "../components/Landing";
 
 export default function Home() {
   const { markets, open, settled, pooled } = useMarkets();
@@ -16,6 +16,7 @@ export default function Home() {
         <Settlement />
         <MarketsCTA open={open} pooled={pooled} />
         <Protocol />
+        <GolazoCTA />
       </main>
       <Footer />
     </>

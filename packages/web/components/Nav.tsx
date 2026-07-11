@@ -39,6 +39,9 @@ export function Nav() {
           <a href="/#settlement">Settlement</a>
           <a href="/markets">Markets</a>
           <a href="/#protocol">Protocol</a>
+          <a href="https://golazo-web-production.up.railway.app/" target="_blank" rel="noreferrer">
+            Golazo ↗
+          </a>
         </nav>
         <div className="wallet-area">
           {!publicKey && (
