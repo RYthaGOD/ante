@@ -8,10 +8,10 @@ import { MarketCard } from "../../components/MarketCard";
 import { Nav } from "../../components/Nav";
 import { Stats, Footer, Ticker } from "../../components/Landing";
 import { useMarkets } from "../../lib/useMarkets";
-import { metaById } from "../../lib/markets";
+import { metaById, kindLabel } from "../../lib/markets";
 import { explorerAddress } from "../../lib/anchor";
 
-type Filter = "all" | "home_win" | "over_2_5" | "settled";
+type Filter = "all" | "home_win" | "over_2_5" | "custom" | "settled";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const marketKind = (a: any): "home_win" | "over_2_5" | "custom" =>
@@ -20,10 +20,13 @@ const marketKind = (a: any): "home_win" | "over_2_5" | "custom" =>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isSettled = (a: any) => "resolved" in a.status || "voided" in a.status;
 
+// `custom` covers player props / tournament specials. Tabs are data-driven
+// (see `tabs` below), so a kind only appears once a market of it exists.
 const TABS: { key: Filter; label: string }[] = [
   { key: "all", label: "All markets" },
-  { key: "home_win", label: "Match Result" },
-  { key: "over_2_5", label: "Goals" },
+  { key: "home_win", label: kindLabel.home_win },
+  { key: "over_2_5", label: kindLabel.over_2_5 },
+  { key: "custom", label: kindLabel.custom },
   { key: "settled", label: "Settled" },
 ];
 
@@ -33,21 +36,27 @@ export default function MarketsPage() {
   const [filter, setFilter] = useState<Filter>("all");
 
   const counts = useMemo(() => {
-    const c: Record<Filter, number> = { all: markets.length, home_win: 0, over_2_5: 0, settled: 0 };
+    const c: Record<Filter, number> = { all: markets.length, home_win: 0, over_2_5: 0, custom: 0, settled: 0 };
     for (const m of markets) {
       const k = marketKind(m.account);
       if (k === "home_win") c.home_win++;
       if (k === "over_2_5") c.over_2_5++;
+      if (k === "custom") c.custom++;
       if (isSettled(m.account)) c.settled++;
     }
     return c;
   }, [markets]);
 
+  // Never render a filter that has nothing behind it.
+  const tabs = useMemo(() => TABS.filter((t) => t.key === "all" || counts[t.key] > 0), [counts]);
+  // If the active tab disappears (live data changed), fall back to All.
+  const active: Filter = tabs.some((t) => t.key === filter) ? filter : "all";
+
   const shown = useMemo(() => {
-    if (filter === "all") return markets;
-    if (filter === "settled") return markets.filter((m) => isSettled(m.account));
-    return markets.filter((m) => marketKind(m.account) === filter);
-  }, [markets, filter]);
+    if (active === "all") return markets;
+    if (active === "settled") return markets.filter((m) => isSettled(m.account));
+    return markets.filter((m) => marketKind(m.account) === active);
+  }, [markets, active]);
 
   const recentlySettled = useMemo(
     () => markets.filter((m) => "resolved" in m.account.status).slice(0, 8),
@@ -87,10 +96,10 @@ export default function MarketsPage() {
 
           <div className="filter-tabs">
             <span className="filter-label">Filter</span>
-            {TABS.map((t) => (
+            {tabs.map((t) => (
               <button
                 key={t.key}
-                className={`filter-tab ${filter === t.key ? "on" : ""}`}
+                className={`filter-tab ${active === t.key ? "on" : ""}`}
                 onClick={() => setFilter(t.key)}
                 type="button"
               >

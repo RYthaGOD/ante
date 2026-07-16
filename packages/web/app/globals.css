@@ -140,6 +140,16 @@ main { max-width: 1240px; margin: 0 auto; padding: 0 24px 96px; }
 .nav-links a:hover { color: var(--cyan-pale); }
 .nav .wallet-area { margin-left: auto; }
 
+/* mobile menu (toggle + panel are desktop-hidden) */
+.nav-toggle {
+  display: none; align-items: center; justify-content: center;
+  background: rgba(27, 32, 38, 0.5); border: 1px solid var(--line); color: var(--text);
+  border-radius: 10px; padding: 8px; cursor: pointer; margin-left: 10px; flex-shrink: 0;
+}
+.nav-toggle:hover { border-color: var(--cyan); color: var(--cyan); }
+.nav-toggle svg { width: 20px; height: 20px; display: block; }
+.nav-mobile { display: none; }
+
 /* ============================================================
    Buttons
    ============================================================ */
@@ -418,8 +428,9 @@ main { max-width: 1240px; margin: 0 auto; padding: 0 24px 96px; }
 /* ============================================================
    Markets grid + card
    ============================================================ */
-.grid { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-.grid.preview { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+/* min() keeps the track from exceeding a narrow viewport (no mobile overflow). */
+.grid { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+.grid.preview { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
 
 .card {
   position: relative;
@@ -870,4 +881,52 @@ a.card-art { text-decoration: none; cursor: pointer; }
   .outcome-row { grid-template-columns: 1fr; }
   .detail-metrics { gap: 24px; }
   .pipeline-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   Mobile pass
+   ============================================================ */
+@media (max-width: 920px) {
+  .nav-toggle { display: inline-flex; }
+  .nav-mobile {
+    display: flex; flex-direction: column;
+    padding: 6px 24px 16px; border-top: 1px solid var(--line-soft);
+    background: rgba(10, 15, 20, 0.97);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  }
+  .nav-mobile a {
+    color: var(--muted); text-decoration: none; font-family: var(--font-mono);
+    font-size: 14px; padding: 14px 2px; border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-mobile a:last-child { border-bottom: none; }
+  .nav-mobile a:hover { color: var(--cyan-pale); }
+
+  .section { padding: 64px 0 8px; }
+  .settle-flow { margin: 64px 0 8px; padding: 60px 0 92px; }
+  .settle-flow-inner { padding: 0 20px; }
+  /* stat/total blocks read better left-aligned once they wrap under the title */
+  .dash-total { text-align: left; }
+  .pf-balance { align-items: flex-start; text-align: left; }
+  /* keep history columns legible: scroll rather than crush */
+  .h-tbl { min-width: 560px; }
+}
+
+@media (max-width: 560px) {
+  main { padding: 0 16px 72px; }
+  .nav-inner { padding: 0 16px; gap: 10px; height: 64px; }
+  .nav-brand .logo { font-size: 26px; }
+  .nav-badge { display: none; }
+  .devnet-hint { display: none; }
+  .nav-mobile { padding-left: 16px; padding-right: 16px; }
+  .wallet-adapter-button-trigger { padding: 10px 14px !important; font-size: 12px !important; }
+
+  .ticker-lime .ticker-item { font-size: 17px; padding: 0 22px; }
+  .ticker-mono .ticker-item { padding: 0 18px; }
+  .cta-band { padding: 26px 20px; border-radius: 20px; }
+  .stake-box { padding: 20px; }
+  .history-head, .h-tbl thead th, .h-tbl td { padding-left: 16px; padding-right: 16px; }
+  .settled-rail, .assurance, .action-card, .pf-card { padding: 20px; }
+  .section-head { margin-bottom: 34px; }
+  .stake-preview { grid-template-columns: 1fr; gap: 10px; }
+  .stake-preview .col.right, .stake-preview .pv.right { text-align: left; }
 }
