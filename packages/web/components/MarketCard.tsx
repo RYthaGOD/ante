@@ -153,14 +153,18 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
     }
   }
 
+  const detailHref = `/markets/${market.publicKey.toBase58()}`;
+
   return (
     <div className={`card ${resolved ? "card-resolved" : ""}`}>
-      <div className="card-art" style={{ background: art.grad }}>
+      <a className="card-art" href={detailHref} style={{ background: art.grad }} aria-label={`Open ${meta?.title ?? account.marketId}`}>
         <ArtImage artKey={meta?.art} />
         <span className="card-kind">{kindLabel[kind]}</span>
-      </div>
+      </a>
       <div className="card-body">
-        <h3>{meta?.title ?? account.marketId}</h3>
+        <a className="card-title-link" href={detailHref}>
+          <h3>{meta?.title ?? account.marketId}</h3>
+        </a>
         <p className="blurb">{meta?.blurb ?? ""}</p>
 
         {(!resolved || total > 0) && (
@@ -198,7 +202,7 @@ export function MarketCard({ market, onChange }: { market: any; onChange: () => 
             <div className="proof">
               <div className="proof-head">
                 <span className="proof-label" style={{ color: "var(--muted)" }}>∅ Market voided</span>
-                <span className="pill">VOID</span>
+                <span className="pill pill-void">VOID</span>
               </div>
               <div className="proof-note">
                 The fixture never produced a result, so every stake is refundable in full — no

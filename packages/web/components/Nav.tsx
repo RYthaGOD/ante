@@ -35,10 +35,10 @@ export function Nav() {
           <span className="nav-badge">Protocol</span>
         </a>
         <nav className="nav-links">
+          <a href="/markets">Markets</a>
+          <a href="/portfolio">Portfolio</a>
           <a href="/#how">How it works</a>
           <a href="/#settlement">Settlement</a>
-          <a href="/markets">Markets</a>
-          <a href="/#protocol">Protocol</a>
           <a href="https://golazo-web-production.up.railway.app/" target="_blank" rel="noreferrer">
             Golazo ↗
           </a>

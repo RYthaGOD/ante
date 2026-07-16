@@ -5,6 +5,23 @@ const PROGRAM = "G1tgXodmDq9X3MTtdHLNpjDWscUqsjiW29fcpUHvJoHu";
 const EXPLORER = `https://explorer.solana.com/address/${PROGRAM}?cluster=devnet`;
 const short = `${PROGRAM.slice(0, 4)}…${PROGRAM.slice(-4)}`;
 
+// The settlement check, syntax-highlighted. HTML-escaped so `<`/`>`/`&` in the
+// code render as text while the <span> class tags style it (injected as raw HTML).
+const SETTLE_SNIPPET = `<span class="k">pub fn</span> post_result(ctx, home, away, sig) -&gt; Result&lt;()&gt; {
+    <span class="c">// 1 · the score is signed by the TxODDS feed —</span>
+    <span class="c">//     verify the ed25519 signature on-chain</span>
+    verify_feed_sig(market.feed_pubkey, &amp;score, &amp;sig)<span class="e">?</span>;
+
+    <span class="c">// 2 · recompute the SHA-256 commitment,</span>
+    <span class="c">//     refuse to settle on any mismatch</span>
+    <span class="k">let</span> digest = sha256(<span class="s">"&lt;market&gt;:&lt;home&gt;:&lt;away&gt;"</span>);
+    require!(digest == expected, <span class="e">BadProof</span>);
+
+    <span class="c">// 3 · settle once — winner + digest go on-chain</span>
+    market.settle(outcome(home, away), digest)<span class="e">?</span>;
+    Ok(())
+}`;
+
 /* ---------- icons (line style, on-brand) ---------- */
 const I = {
   list: (
@@ -47,58 +64,67 @@ const I = {
       <path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16" /><circle cx="5" cy="19" r="1.6" />
     </svg>
   ),
+  key: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="15" r="4" /><path d="M11 12l9-9M17 5l2 2M14 8l2 2" />
+    </svg>
+  ),
 };
 
+/* ---------- marquee ticker ---------- */
+export function Ticker({ variant, items }: { variant: "lime" | "mono"; items: React.ReactNode[] }) {
+  const track = (k: string, hidden: boolean) => (
+    <div className="ticker-track" key={k} aria-hidden={hidden}>
+      {items.map((it, i) => (
+        <span className="ticker-item" key={`${k}-${i}`}>{it}</span>
+      ))}
+    </div>
+  );
+  return (
+    <div className={`ticker ticker-${variant}`}>
+      {track("a", false)}
+      {track("b", true)}
+    </div>
+  );
+}
+
 /* ---------- hero ---------- */
-export function Hero() {
+export function Hero({ open, settled, pooled }: { open: number; settled: number; pooled: number }) {
   return (
     <section className="hero">
-      <div className="hero-grid">
-        <div className="hero-copy">
-          <div className="eyebrow">Prediction markets · Solana</div>
-          <h1>
-            Bet on the World Cup.
-            <br />
-            <span className="grad">Settled on-chain, in the open.</span>
-          </h1>
-          <p className="lede">
-            ANTE settles every market from TxODDS match results and writes the outcome — plus a
-            SHA-256 proof — to Solana. Most apps just tell you that you won. ANTE lets you check.
-          </p>
-          <div className="cta-row">
-            <a className="btn-primary" href="/markets">Explore live markets →</a>
-            <a className="btn-ghost" href="#how">See how it works</a>
-          </div>
-          <div className="trust-row">
-            <span><i className="dot dot-green" /> Live on Devnet</span>
-            <span><i className="dot dot-cyan" /> TxODDS results</span>
-            <span><i className="dot dot-gold" /> Built on Solana</span>
-          </div>
+      <div className="hero-inner">
+        <div className="eyebrow">Prediction markets · Solana devnet</div>
+        <h1>
+          Bet on the <span className="cyan">World Cup.</span>
+          <br />
+          Settled on-chain.
+        </h1>
+        <p className="lede">
+          ANTE settles every market from <span className="hl-lime">TxODDS</span> match results and
+          writes the outcome — plus a <span className="hl-cyan">SHA-256 proof</span> — to Solana.
+          Most apps just tell you that you won. ANTE lets you check.
+        </p>
+        <div className="cta-row">
+          <a className="btn-primary lg" href="/markets">Explore live markets →</a>
+          <a className="btn-ghost lg" href="#how">See how it works</a>
         </div>
-
-        <div className="hero-visual">
-          <div className="showcase-card">
-            <div className="sc-art">
-              <img src="/art/spain.png" alt="Spain match market" />
-              <span className="sc-kind">Match Result</span>
-              <span className="sc-live">● SETTLED</span>
-            </div>
-            <div className="sc-body">
-              <h3>La Roja Roll the Desert Hawks</h3>
-              <div className="sc-odds"><span className="sc-yes" /></div>
-              <div className="sc-proof">
-                <div className="sc-proof-head">
-                  <span>✓ Settled on-chain</span>
-                  <span className="pill pill-yes">YES won</span>
-                </div>
-                <code>sha256 · a51a13321266…8f8642</code>
-                <span className="sc-proof-note">Checked against the TxODDS result</span>
-              </div>
-            </div>
-          </div>
-          <div className="float-chip chip-a">SHA-256 verified ✓</div>
-          <div className="float-chip chip-b">◎ paid pro-rata</div>
+        <div className="trust-row">
+          <span><i className="dot dot-live" /> Live on Devnet</span>
+          <span><i className="dot dot-cyan" /> TxODDS results</span>
+          <span><i className="dot dot-lime" /> Built on Solana</span>
         </div>
+      </div>
+      <div className="hero-ticker">
+        <Ticker
+          variant="lime"
+          items={[
+            <><b>TOTAL STAKED</b> ◎ {pooled.toFixed(2)}</>,
+            <><b>ON-CHAIN PROOFS</b> {settled}</>,
+            <><b>MARKETS OPEN</b> {open}</>,
+            <><b>SETTLED FROM</b> TxODDS</>,
+            <><b>NETWORK</b> SOLANA DEVNET</>,
+          ]}
+        />
       </div>
     </section>
   );
@@ -124,97 +150,82 @@ export function Stats({ count, open, settled, pooled }: { count: number; open: n
   );
 }
 
-/* ---------- how it works ---------- */
-export function HowItWorks() {
+/* ---------- settlement flow (lime band) ---------- */
+export function SettleFlow() {
   const steps = [
-    { icon: I.list, t: "Pick a market", d: "Yes/no questions on World Cup match results, total goals, and player props." },
-    { icon: I.coin, t: "Stake your side", d: "Your SOL goes into a shared pool the program controls — not a company wallet." },
-    { icon: I.shield, t: "Settle from the result", d: "When the match ends, the TxODDS result is posted on-chain with the feed's ed25519 signature. The program verifies the signature, recomputes the SHA-256 digest, and settles only if both check out." },
-    { icon: I.trophy, t: "Claim your share", d: "Winners take their share of the pool directly on-chain. No middleman, no waiting." },
-  ];
-  const flow = [
-    { icon: I.feed, t: "TxODDS feed", s: "match results" },
-    { icon: I.bolt, t: "Oracle / feeder", s: "posts on-chain" },
-    { icon: I.globe, t: "Solana program", s: "checks + settles" },
-    { icon: I.trophy, t: "You", s: "claim winnings" },
+    { n: "01", t: "Pick", d: "Yes/no questions on World Cup match results, total goals, and player props — read from verified TxODDS feeds." },
+    { n: "02", t: "Stake", d: "Commit SOL to a shared pool the program controls — not a company wallet." },
+    { n: "03", t: "Settle", d: "The TxODDS result is posted on-chain. The program verifies the feed's ed25519 signature and the SHA-256 proof." },
+    { n: "04", t: "Claim", d: "Winners take their pro-rata share of the pool directly on-chain. No middleman, no waiting." },
   ];
   return (
-    <section className="section" id="how">
-      <div className="section-head">
-        <div className="eyebrow">How it works</div>
-        <h2>Four steps, start to finish.</h2>
-        <p>Every step is a real Solana transaction that anyone can look up.</p>
-      </div>
-      <div className="steps">
-        {steps.map((s, i) => (
-          <div className="step" key={s.t}>
-            <div className="step-top">
-              <span className="step-icon">{s.icon}</span>
-              <span className="step-num">{String(i + 1).padStart(2, "0")}</span>
+    <section className="settle-flow" id="how">
+      <div className="settle-flow-inner">
+        <h2>Settlement<br />without trust.</h2>
+        <p className="flow-lede">
+          Not a private server deciding who won. Every step below is a real Solana transaction anyone
+          can look up — pick, stake, settle, and claim, in the open.
+        </p>
+        <div className="flow-steps">
+          {steps.map((s) => (
+            <div className="flow-step" key={s.n}>
+              <div className="num">{s.n}</div>
+              <h4>{s.t}</h4>
+              <p>{s.d}</p>
             </div>
-            <h3>{s.t}</h3>
-            <p>{s.d}</p>
-          </div>
-        ))}
-      </div>
-      <div className="flow">
-        {flow.map((f, i) => (
-          <React.Fragment key={f.t}>
-            <div className="flow-node">
-              <span className="flow-icon">{f.icon}</span>
-              <div>
-                <div className="flow-t">{f.t}</div>
-                <div className="flow-s">{f.s}</div>
-              </div>
-            </div>
-            {i < flow.length - 1 && <span className="flow-arrow">→</span>}
-          </React.Fragment>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-/* ---------- settlement spotlight ---------- */
-export function Settlement() {
-  const guards = [
-    { icon: I.feed, t: "Feed-signed", d: "The score carries the feed's ed25519 signature, verified on-chain — even the oracle can't post a result the feed never produced." },
-    { icon: I.lock, t: "Time-locked", d: "Betting closes at kickoff and a market can't settle before its scheduled time." },
-    { icon: I.shield, t: "Hash-checked", d: "The program recomputes the SHA-256 digest and rejects any mismatch." },
-    { icon: I.trophy, t: "Once, and public", d: "A market settles one time, and the proof stays on-chain." },
+/* ---------- verified by code ---------- */
+export function VerifiedByCode() {
+  const chips = [
+    { icon: I.feed, tone: "cyan", t: "Feed-signed · ed25519 verified" },
+    { icon: I.lock, tone: "lime", t: "Time-locked · closes at kickoff" },
+    { icon: I.shield, tone: "cyan", t: "Hash-checked · SHA-256 recompute" },
+    { icon: I.key, tone: "lime", t: "Settled once · proof stays on-chain" },
   ];
   return (
-    <section className="section settle" id="settlement">
-      <div className="section-head">
-        <div className="eyebrow">Settlement</div>
-        <h2>Settlement you can check</h2>
-        <p>
-          Most apps decide the result on a private server. ANTE writes the winning outcome and a
-          SHA-256 proof on-chain, so anyone can recompute it from the public match result.
-        </p>
-      </div>
-      <div className="settle-grid">
-        <div className="compare">
-          <div className="compare-row bad">
-            <span className="compare-tag">Most apps</span>
-            <span>&ldquo;You won — redeem for cash.&rdquo; <em>Source: a private server.</em></span>
-          </div>
-          <div className="compare-row good">
-            <span className="compare-tag">ANTE</span>
-            <span>Winner and SHA-256 proof on-chain, with a link to Solana Explorer.</span>
-          </div>
-          <a className="btn-ghost" href={EXPLORER} target="_blank" rel="noreferrer">View the program on Solana Explorer →</a>
-        </div>
-        <div className="guards">
-          {guards.map((g) => (
-            <div className="guard" key={g.t}>
-              <span className="guard-icon">{g.icon}</span>
-              <div>
-                <div className="guard-t">{g.t}</div>
-                <div className="guard-d">{g.d}</div>
-              </div>
+    <section className="section" id="settlement">
+      <div className="verified-grid">
+        <div className="verified-copy">
+          <div className="eyebrow">Settlement</div>
+          <h2>Verified by code.</h2>
+          <p>
+            Most apps decide the result on a private server. ANTE writes the winning outcome and a
+            SHA-256 proof on-chain, so anyone can recompute it from the public TxODDS result.
+          </p>
+          <div className="compare">
+            <div className="compare-row bad">
+              <span className="compare-tag">Most apps</span>
+              <span>&ldquo;You won — redeem for cash.&rdquo; <em>Source: a private server.</em></span>
             </div>
-          ))}
+            <div className="compare-row good">
+              <span className="compare-tag">ANTE</span>
+              <span>Winner and SHA-256 proof on-chain, with a link to Solana Explorer.</span>
+            </div>
+          </div>
+          <div className="verify-chips">
+            {chips.map((c) => (
+              <div className="verify-chip" key={c.t}>
+                <span className={`vc-icon ${c.tone}`}>{c.icon}</span>
+                <span className="vc-t">{c.t}</span>
+                <span className="vc-check">✓</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="verified-code">
+          <div className="code-card">
+            <div className="code-dots"><i className="d1" /><i className="d2" /><i className="d3" /></div>
+            <pre><code dangerouslySetInnerHTML={{ __html: SETTLE_SNIPPET }} /></pre>
+          </div>
+          <a className="btn-ghost" href={EXPLORER} target="_blank" rel="noreferrer" style={{ marginTop: 16 }}>
+            View the program on Solana Explorer →
+          </a>
         </div>
       </div>
     </section>
@@ -225,8 +236,8 @@ export function Settlement() {
 export function MarketsCTA({ open, pooled }: { open: number; pooled: number }) {
   return (
     <section className="section">
-      <div className="markets-cta" id="markets">
-        <div className="markets-cta-copy">
+      <div className="cta-band">
+        <div className="cta-copy">
           <div className="eyebrow">Live on devnet</div>
           <h2>{open} markets open right now</h2>
           <p>
@@ -234,7 +245,7 @@ export function MarketsCTA({ open, pooled }: { open: number; pooled: number }) {
             and place a real bet. Settlement and payout run on Solana.
           </p>
         </div>
-        <a className="btn-primary markets-cta-btn" href="/markets">Browse all markets →</a>
+        <a className="btn-primary lg" href="/markets">Browse all markets →</a>
       </div>
     </section>
   );
@@ -244,22 +255,17 @@ export function MarketsCTA({ open, pooled }: { open: number; pooled: number }) {
 export function GolazoCTA() {
   return (
     <section className="section">
-      <div className="markets-cta golazo-cta">
-        <div className="markets-cta-copy">
+      <div className="cta-band golazo">
+        <div className="cta-copy">
           <div className="eyebrow">From the same builders</div>
           <h2>The World Cup ends. Golazo doesn&rsquo;t.</h2>
           <p>
-            A World Cup trading-card game on Solana — open packs, collect players rated from
-            real stats, build your 5, and battle (or stake SOL on it). Golazo even uses ANTE&rsquo;s
+            A World Cup trading-card game on Solana — open packs, collect players rated from real
+            stats, build your 5, and battle (or stake SOL on it). Golazo even uses ANTE&rsquo;s
             on-chain settlement to recompute match stats.
           </p>
         </div>
-        <a
-          className="btn-primary markets-cta-btn"
-          href="https://golazo-web-production.up.railway.app/"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a className="btn-primary lg" href="https://golazo-web-production.up.railway.app/" target="_blank" rel="noreferrer">
           Try Golazo →
         </a>
       </div>
@@ -277,7 +283,7 @@ export function Protocol() {
   ];
   const roadmap = ["Multiple feeders", "On-chain dispute window", "Mainnet launch", "More competitions & sports"];
   return (
-    <section className="section protocol" id="protocol">
+    <section className="section" id="protocol">
       <div className="section-head">
         <div className="eyebrow">The protocol</div>
         <h2>Under the hood</h2>
@@ -296,7 +302,7 @@ export function Protocol() {
         <a className="prog-chip" href={EXPLORER} target="_blank" rel="noreferrer">
           <span>Program (devnet)</span>
           <code>{short}</code>
-          <span className="prog-go">↗</span>
+          <span className="go">↗</span>
         </a>
         <div className="roadmap">
           <span className="roadmap-label">Roadmap</span>
@@ -309,6 +315,25 @@ export function Protocol() {
   );
 }
 
+/* ---------- bottom mono ticker ---------- */
+export function BottomTicker() {
+  return (
+    <div style={{ margin: "40px 0" }}>
+      <Ticker
+        variant="mono"
+        items={[
+          <><b>PROGRAM</b> {short}</>,
+          <><b>NETWORK</b> SOLANA DEVNET</>,
+          <><b>PROOF</b> SHA-256 + ED25519</>,
+          <><b>FEED</b> TxODDS</>,
+          <><b>SETTLEMENT</b> ON-CHAIN · PUBLIC</>,
+          <><b>PAYOUT</b> PARIMUTUEL · PRO-RATA</>,
+        ]}
+      />
+    </div>
+  );
+}
+
 /* ---------- footer ---------- */
 export function Footer() {
   return (
@@ -316,10 +341,11 @@ export function Footer() {
       <div className="footer-top">
         <div>
           <span className="logo">ANTE</span>
-          <p>Prediction markets that settle on-chain.</p>
+          <p>Prediction markets that settle on-chain — every outcome checkable against the public TxODDS result.</p>
         </div>
         <div className="footer-links">
           <a href="/#how">How it works</a>
+          <a href="/#settlement">Settlement</a>
           <a href="/markets">Markets</a>
           <a href="https://golazo-web-production.up.railway.app/" target="_blank" rel="noreferrer">Golazo ↗</a>
           <a href="https://github.com/RYthaGOD/ante" target="_blank" rel="noreferrer">GitHub ↗</a>
@@ -328,7 +354,8 @@ export function Footer() {
         </div>
       </div>
       <div className="footer-bot">
-        Built for the TxODDS World Cup Hackathon — Prediction Markets &amp; Settlement.
+        <span>Built for the TxODDS World Cup Hackathon — Prediction Markets &amp; Settlement.</span>
+        <span className="footer-status"><i className="dot dot-lime" /> Solana devnet · live</span>
       </div>
     </footer>
   );
